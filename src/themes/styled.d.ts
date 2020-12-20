@@ -5,5 +5,8 @@ declare module 'styled-components' {
     site: {
       background: string;
     };
+    colors: {
+      heading: string;
+    };
   }
 }
