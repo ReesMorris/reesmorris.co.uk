@@ -1,7 +1,8 @@
 import React from 'react';
+import Page from '../components/page';
 
 const Index: React.FC = () => {
-  return <p>Index</p>;
+  return <Page>Index</Page>;
 };
 
 export default Index;
