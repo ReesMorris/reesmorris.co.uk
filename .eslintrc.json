@@ -10,5 +10,13 @@
   },
   "globals": {
     "React": "writable"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "react/prop-types": "off" // see https://github.com/yannickcr/eslint-plugin-react/issues/2353
+      }
+    }
+  ]
 }
