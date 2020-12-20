@@ -22,4 +22,9 @@ export default css`
       Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
       'Segoe UI Symbol';
   }
+
+  a {
+    color: ${props => props.theme.colors.primary};
+    text-decoration: underline;
+  }
 `;
