@@ -25,6 +25,10 @@ export default css`
 
   a {
     color: ${props => props.theme.colors.primary};
-    text-decoration: underline;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 `;

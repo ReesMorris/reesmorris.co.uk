@@ -5,6 +5,7 @@ interface TextProps {
   as?: React.ElementType;
   design?: string;
   bold?: boolean;
+  dark?: boolean;
   className?: string;
   children: React.ReactNode;
 }
@@ -13,6 +14,7 @@ const Text: React.FC<TextProps> = ({
   as = 'p',
   design,
   bold,
+  dark,
   className,
   children
 }) => {
@@ -21,6 +23,7 @@ const Text: React.FC<TextProps> = ({
       as={as}
       design={design || as}
       bold={bold}
+      dark={dark}
       className={className}
     >
       {children}

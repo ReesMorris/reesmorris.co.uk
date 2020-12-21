@@ -1,13 +1,15 @@
 import { DefaultTheme } from 'styled-components';
+import _consts from './_consts';
 
 const theme: DefaultTheme = {
+  _consts,
   site: {
     background: '#ffffff'
   },
   colors: {
     heading: '#000000',
     primary: '#000000',
-    secondary: '#4b5563'
+    secondary: '#2d3748'
   }
 };
 
