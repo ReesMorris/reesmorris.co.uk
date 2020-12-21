@@ -3,8 +3,9 @@ import _consts from './_consts';
 
 const theme: DefaultTheme = {
   _consts,
+  name: 'dark',
   site: {
-    background: '#000000'
+    background: '#1a212c'
   },
   colors: {
     heading: '#ffffff',

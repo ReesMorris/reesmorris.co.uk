@@ -6,7 +6,6 @@ const Header = styled.header`
   top: 0;
   z-index: 10;
   padding: 4rem;
-  backdrop-filter: saturate(180%) blur(20px);
 `;
 
 const Content = styled.div`
@@ -17,11 +16,14 @@ const Content = styled.div`
 const Nav = styled.nav``;
 
 const NavLink = styled(LinkWrapper)`
+  padding: 1rem;
   &:not(:first-child) {
     margin-left: 2rem;
   }
 `;
 
-const Aside = styled.aside``;
+const Aside = styled.aside`
+  display: flex;
+`;
 
 export default { Header, Content, Nav, NavLink, Aside };

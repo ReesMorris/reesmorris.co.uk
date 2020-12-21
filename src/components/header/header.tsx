@@ -1,5 +1,7 @@
 import React from 'react';
+import Button from '../button';
 import Text from '../text';
+import ToggleThemeButton from '../toggle-theme-button';
 import Wrapper from '../wrapper';
 import Styles from './header.styles';
 
@@ -25,7 +27,9 @@ const Header: React.FC = () => {
               </Text>
             </Styles.NavLink>
           </Styles.Nav>
-          <Styles.Aside>Aside</Styles.Aside>
+          <Styles.Aside>
+            <ToggleThemeButton />
+          </Styles.Aside>
         </Styles.Content>
       </Wrapper>
     </Styles.Header>

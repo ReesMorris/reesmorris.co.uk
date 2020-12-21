@@ -3,6 +3,7 @@ import _consts from './_consts';
 
 const theme: DefaultTheme = {
   _consts,
+  name: 'light',
   site: {
     background: '#ffffff'
   },

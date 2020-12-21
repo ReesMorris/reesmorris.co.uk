@@ -8,6 +8,7 @@ export interface IWidths {
 
 declare module 'styled-components' {
   export interface DefaultTheme {
+    name: string;
     _consts: {
       widths: IWidths;
     };

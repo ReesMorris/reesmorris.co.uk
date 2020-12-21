@@ -22,6 +22,7 @@ const Button = styled.button<ButtonProps>`
   align-items: center;
   transition: all 0.2s ease;
   border-radius: 0.3rem;
+  color: ${props => props.theme.colors.secondary};
 
   &:hover {
     background: ${props => props.theme.button.hover_background};
@@ -36,6 +37,7 @@ const Button = styled.button<ButtonProps>`
       border: none;
       border-radius: 50%;
       box-shadow: none;
+      background: transparent;
 
       ${Icon} {
         margin-right: 0;
