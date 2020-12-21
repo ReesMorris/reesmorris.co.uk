@@ -19,5 +19,10 @@ declare module 'styled-components' {
       primary: string;
       secondary: string;
     };
+    button: {
+      background: string;
+      border: string;
+      hover_background: string;
+    };
   }
 }

@@ -2,14 +2,20 @@ import React from 'react';
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
 import Styles from './icon.styles';
 
-interface IconProps {
+export interface IconProps {
+  icon: IconName;
+  weight?: IconPrefix;
+  title?: string;
+}
+
+interface LocalIconProps {
   icon: IconName;
   weight?: IconPrefix;
   title?: string;
   className?: string;
 }
 
-const Icon: React.FC<IconProps> = ({
+const Icon: React.FC<LocalIconProps> = ({
   icon,
   weight = 'fal',
   title,
