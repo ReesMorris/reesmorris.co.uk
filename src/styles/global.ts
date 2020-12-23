@@ -24,6 +24,7 @@ export default css`
   }
 
   a {
+    display: inline-block;
     color: ${props => props.theme.colors.primary};
     text-decoration: none;
 

@@ -4,6 +4,7 @@ import Text from '../text';
 import Styles from './button.styles';
 
 interface ButtonProps {
+  as?: React.ElementType;
   icon?: IconProps;
   text: string;
   hideText?: boolean;
@@ -14,6 +15,7 @@ interface ButtonProps {
 }
 
 const Button: React.FC<ButtonProps> = ({
+  as,
   icon,
   text,
   hideText,
@@ -22,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   return (
     <Styles.Button
+      as={as || 'button'}
       iconOnly={icon && hideText}
       className={className}
       onClick={onClick}
