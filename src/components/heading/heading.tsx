@@ -5,10 +5,10 @@ interface HeadingProps {
   as?: React.ElementType;
   design?: string;
   className?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
-const Heading: React.FC<HeadingProps> = ({
+const Heading: React.FunctionComponent<HeadingProps> = ({
   as = 'h1',
   design,
   className,

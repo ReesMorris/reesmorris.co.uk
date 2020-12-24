@@ -11,6 +11,10 @@ const Text = styled.p<TextProps>`
     (props.dark && props.theme.colors.primary) || props.theme.colors.secondary};
   font-weight: ${props => (props.bold ? '600' : '400')};
   line-height: 2.4rem;
+
+  &:not(:last-child) {
+    margin-bottom: 2rem;
+  }
 `;
 
 export default { Text };
