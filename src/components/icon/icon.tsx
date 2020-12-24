@@ -22,7 +22,12 @@ const Icon: React.FC<LocalIconProps> = ({
   className
 }) => {
   return (
-    <Styles.Icon icon={[weight, icon]} title={title} className={className} />
+    <Styles.Icon
+      icon={[weight, icon]}
+      title={title}
+      className={className}
+      width='16'
+    />
   );
 };
 

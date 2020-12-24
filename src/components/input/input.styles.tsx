@@ -34,7 +34,7 @@ const Input = styled.input<InputProps>`
   ${props =>
     props.icon === 'left' &&
     css`
-      padding-left: 3.2rem;
+      padding-left: 3.8rem;
     `}
 `;
 

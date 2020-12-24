@@ -25,14 +25,13 @@ const Input: React.FC<InputTypes> = ({
   onChange
 }) => {
   return (
-    <Styles.InputWrapper>
+    <Styles.InputWrapper id={id}>
       {iconLeft && <Styles.Icon icon='search' />}
       <Styles.Input
         icon={(iconLeft && 'left') || 'none'}
         as={as}
         type={type}
         placeholder={placeholder}
-        id={id}
         value={value}
         name={name}
         onChange={onChange}

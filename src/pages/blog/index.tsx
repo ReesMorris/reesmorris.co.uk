@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { GetStaticProps } from 'next';
+import React, { useState } from 'react';
 import BlogCard from '../../components/blog-card';
 import Container from '../../components/container';
-import Form from '../../components/form';
 import Heading from '../../components/heading';
 import Input from '../../components/input';
 import NoScript from '../../components/noscript';
@@ -62,7 +62,7 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
 };
 export default Blog;
 
-export const getStaticProps = async ctx => {
+export const getStaticProps: GetStaticProps = async () => {
   const posts: IFrontMatter[] = await getFilesWithFrontMatter('blog');
   return { props: { posts } };
 };

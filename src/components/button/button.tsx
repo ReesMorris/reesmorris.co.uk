@@ -5,6 +5,7 @@ import Styles from './button.styles';
 
 interface ButtonProps {
   as?: React.ElementType;
+  id?: string;
   icon?: IconProps;
   text: string;
   hideText?: boolean;
@@ -16,6 +17,7 @@ interface ButtonProps {
 
 const Button: React.FC<ButtonProps> = ({
   as,
+  id,
   icon,
   text,
   hideText,
@@ -25,6 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <Styles.Button
       as={as || 'button'}
+      id={id}
       iconOnly={icon && hideText}
       className={className}
       onClick={onClick}
