@@ -16,6 +16,11 @@ const theme: DefaultTheme = {
     background: '#ffffff',
     border: '#cbd5e0',
     hover_background: '#f7fafc'
+  },
+  input: {
+    background: '#ffffff',
+    border: '#e5e7eb',
+    focus_border: '#71b0dc'
   }
 };
 

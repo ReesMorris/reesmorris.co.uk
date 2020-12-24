@@ -1,8 +1,11 @@
 import styled from 'styled-components';
 
-const Container = styled.div`
+interface ContainerProps {
+  small?: boolean;
+}
+const Container = styled.div<ContainerProps>`
   &:not(:last-child) {
-    margin-bottom: 3.5rem;
+    margin-bottom: ${props => (props.small && '1.5rem') || '3.5rem'};
   }
 `;
 

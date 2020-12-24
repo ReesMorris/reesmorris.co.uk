@@ -25,5 +25,10 @@ declare module 'styled-components' {
       border: string;
       hover_background: string;
     };
+    input: {
+      background: string;
+      border: string;
+      focus_border: string;
+    };
   }
 }

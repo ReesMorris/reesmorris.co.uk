@@ -20,10 +20,10 @@ const Heading = styled.h1<HeadingProps>`
     (props.design === 'h3' && '2.3rem') ||
     '2.3rem'};
   margin-bottom: ${props =>
-    (props.design === 'h1' && '2.5rem') ||
-    (props.design === 'h2' && '2rem') ||
-    (props.design === 'h3' && '1.5rem') ||
-    (props.design === 'h4' && '1rem') ||
+    (props.design === 'h1' && '1.2rem') ||
+    (props.design === 'h2' && '1.0rem') ||
+    (props.design === 'h3' && '0.8rem') ||
+    (props.design === 'h4' && '0.6rem') ||
     '1rem'};
 `;
 
