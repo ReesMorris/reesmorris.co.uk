@@ -6,6 +6,7 @@ const Header = styled.header`
   top: 0;
   z-index: 10;
   padding: 4rem;
+  background: ${props => props.theme.site.background};
 `;
 
 const Content = styled.div`

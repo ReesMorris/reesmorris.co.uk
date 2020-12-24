@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-const Footer = styled.footer``;
+const Footer = styled.footer`
+  margin: 5rem 0 2.5rem 0;
+`;
 
 const Links = styled.ul`
   display: flex;

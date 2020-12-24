@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from '../button';
 import Text from '../text';
 import ToggleThemeButton from '../toggle-theme-button';
 import Wrapper from '../wrapper';
@@ -8,7 +7,7 @@ import Styles from './header.styles';
 const Header: React.FC = () => {
   return (
     <Styles.Header role='banner'>
-      <Wrapper width='body'>
+      <Wrapper type='header'>
         <Styles.Content>
           <Styles.Nav>
             <Styles.NavLink href='/'>

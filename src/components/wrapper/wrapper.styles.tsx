@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 
 interface WrapperProps {
-  width?: 'body' | 'header';
+  type?: 'body' | 'header';
 }
 
 const Wrapper = styled.div<WrapperProps>`
   width: ${props =>
-    (props.width === 'header' && props.theme._consts.widths.header_width) ||
+    (props.type === 'header' && props.theme._consts.widths.header_width) ||
     props.theme._consts.widths.body_width};
   margin: 0 auto;
   height: 100%;

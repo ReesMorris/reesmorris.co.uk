@@ -2,12 +2,12 @@ import React from 'react';
 import Styles from './wrapper.styles';
 
 interface WrapperProps {
-  width?: 'body' | 'header';
+  type?: 'body' | 'header';
   children: React.ReactNode;
 }
 
-const Wrapper: React.FC<WrapperProps> = ({ width, children }) => {
-  return <Styles.Wrapper width={width}>{children}</Styles.Wrapper>;
+const Wrapper: React.FC<WrapperProps> = ({ type = 'body', children }) => {
+  return <Styles.Wrapper type={type}>{children}</Styles.Wrapper>;
 };
 
 export default Wrapper;
