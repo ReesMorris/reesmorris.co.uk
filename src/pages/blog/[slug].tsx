@@ -1,44 +1,37 @@
 import React from 'react';
-import { MdxRemote } from 'next-mdx-remote/types';
-import hydrate from 'next-mdx-remote/hydrate';
-import Heading from '../../components/heading';
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { IDataItem } from '../../models/data-item';
+import { getFilesByType, getFile } from '../../lib/mdx';
 import Page from '../../components/page';
 import Wrapper from '../../components/wrapper';
-import { getFiles, getFileBySlug } from '../../lib/mdx';
-import { IFrontMatter } from '../../models/front-matter';
-import MDXProvider from '../../components/mdx-provider';
+import Heading from '../../components/heading';
 
-interface BlogPageProps {
-  mdxSource: MdxRemote.Source;
-  frontMatter: IFrontMatter;
+interface BlogPostProps {
+  post: IDataItem;
 }
 
-const components: MdxRemote.Components = { Heading };
-const BlogPage: React.FC<BlogPageProps> = ({ mdxSource, frontMatter }) => {
-  const content = hydrate(mdxSource, { components });
-
+const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
   return (
     <Page>
       <Wrapper>
-        <Heading>{frontMatter.title}</Heading>
-        <MDXProvider>{content}</MDXProvider>
+        <Heading>{post.frontMatter.title}</Heading>
+        {post.mdxSource.renderedOutput}
       </Wrapper>
     </Page>
   );
 };
 
-export const getStaticPaths = async () => {
-  const posts = await getFiles('blog');
+export default BlogPost;
 
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = await getFilesByType('blog');
   return {
-    paths: posts.map(p => ({ params: { slug: p.replace(/\.mdx/, '') } })),
+    paths: paths.map(p => ({ params: { slug: p.replace(/\.mdx/, '') } })),
     fallback: false
   };
 };
 
-export const getStaticProps = async ({ params }) => {
-  const post = await getFileBySlug('blog', `${params.slug}.mdx`);
-  return { props: post };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const post = await getFile('blog', `${params?.slug}.mdx`);
+  return { props: { post } };
 };
-
-export default BlogPage;

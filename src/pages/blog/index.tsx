@@ -8,11 +8,11 @@ import NoScript from '../../components/noscript';
 import Page from '../../components/page';
 import Text from '../../components/text';
 import Wrapper from '../../components/wrapper';
-import { getFilesWithFrontMatter } from '../../lib/mdx';
-import { IFrontMatter } from '../../models/front-matter';
+import { getFiles } from '../../lib/mdx';
+import { IDataItem } from '../../models/data-item';
 
 interface BlogProps {
-  posts: IFrontMatter[];
+  posts: IDataItem[];
 }
 
 const Blog: React.FC<BlogProps> = ({ posts }) => {
@@ -20,9 +20,13 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
 
   const sorted = posts
     .filter(post =>
-      post.title.toLowerCase().includes(searchInput.toLowerCase())
+      post.frontMatter.title.toLowerCase().includes(searchInput.toLowerCase())
     )
-    .sort((a, b) => Number(new Date(b.date)) - Number(new Date(a.date)));
+    .sort(
+      (a, b) =>
+        Number(new Date(b.frontMatter.date)) -
+        Number(new Date(a.frontMatter.date))
+    );
 
   return (
     <Page>
@@ -49,10 +53,8 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
           <Heading as='h2'>All Posts</Heading>
           {sorted.map(post => (
             <BlogCard
-              key={post.title}
-              title={post.title}
-              summary={post.summary}
-              slug={post.slug}
+              key={post.frontMatter.title}
+              frontMatter={post.frontMatter}
             />
           ))}
         </Container>
@@ -63,7 +65,6 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
 export default Blog;
 
 export const getStaticProps: GetStaticProps = async () => {
-  const posts: IFrontMatter[] = await getFilesWithFrontMatter('blog');
-  console.log(posts);
+  const posts = await getFiles('blog');
   return { props: { posts } };
 };

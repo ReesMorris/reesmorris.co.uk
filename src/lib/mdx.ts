@@ -1,49 +1,66 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import renderToString from 'next-mdx-remote/render-to-string';
-import Heading from '../components/heading';
+import { IFrontMatter } from '../models/front-matter';
 import { IDataItem } from '../models/data-item';
 import { MdxRemote } from 'next-mdx-remote/types';
+import renderToString from 'next-mdx-remote/render-to-string';
+import mdxPrism from 'mdx-prism';
+import Heading from '../components/heading';
 
 const root = process.cwd();
 const dataPath = 'src/data';
-
 type types = 'blog';
-export const getFiles = async (type: types): Promise<string[]> => {
-  console.log(path.join(root, dataPath, type));
+
+// Returns files from directory
+export const getFilesByType = async (type: types): Promise<string[]> => {
   return fs.readdirSync(path.join(root, dataPath, type));
 };
 
-export const getSource = async (type: types, slug: string): Promise<string> => {
+// Returns a file by its slug
+const getFileBySlug = async (type: types, slug: string): Promise<string> => {
   return fs.readFileSync(path.join(root, dataPath, type, slug), 'utf8');
 };
 
-export const getFileBySlug = async (
+// Returns file FrontMatter and MDX Source
+const getFileData = async (file: string, slug: string): Promise<IDataItem> => {
+  const { data, content } = matter(file);
+
+  // Pull FrontMatter from `data` field
+  const frontMatter: IFrontMatter = {
+    title: data.title,
+    summary: data.summary,
+    slug,
+    date: data.date || null
+  };
+
+  // Format MDXSource
+  const mdxSource: MdxRemote.Source = await renderToString(content, {
+    components: { Heading },
+    scope: data,
+    mdxOptions: {
+      rehypePlugins: [mdxPrism]
+    }
+  });
+
+  return Promise.resolve({ frontMatter, mdxSource });
+};
+
+// Returns all files of type
+export const getFiles = async (type: types): Promise<IDataItem[]> => {
+  const files = await getFilesByType(type);
+
+  return files.reduce(async (allPosts: Promise<IDataItem[]>, slug) => {
+    const data = await getFileData(await getFileBySlug(type, slug), slug);
+
+    return Promise.resolve([...(await allPosts), { ...data }]);
+  }, Promise.resolve([]));
+};
+
+// Returns a single file of type and slug
+export const getFile = async (
   type: types,
   slug: string
 ): Promise<IDataItem> => {
-  const source = await getSource(type, slug);
-  const { data, content } = matter(source);
-
-  const mdxSource: MdxRemote.Source = await renderToString(content, {
-    components: { Heading },
-    scope: data
-  });
-
-  return Promise.resolve({
-    mdxSource,
-    frontMatter: { slug: slug.replace('.mdx', ''), ...data }
-  });
-};
-
-// TODO: Proper types
-export const getFilesWithFrontMatter: any = async (type: types) => {
-  const files = await getFiles(type);
-
-  return files.reduce(async (allPosts: Promise<any>, slug) => {
-    const data = await getFileBySlug(type, slug);
-
-    return Promise.resolve([...(await allPosts), { ...data.frontMatter }]);
-  }, Promise.resolve([]));
+  return await getFileData(await getFileBySlug(type, slug), slug);
 };

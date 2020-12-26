@@ -1,15 +1,16 @@
 import React from 'react';
+import { IFrontMatter } from '../../models/front-matter';
 import Heading from '../heading';
 import Text from '../text';
 import Styles from './blog-card.styles';
 
 interface BlogCardProps {
-  title: string;
-  summary: string;
-  slug: string;
+  frontMatter: IFrontMatter;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ title, summary, slug }) => {
+const BlogCard: React.FC<BlogCardProps> = ({ frontMatter }) => {
+  const { title, summary, slug } = frontMatter;
+
   return (
     <Styles.BlogCard>
       <Styles.Header>

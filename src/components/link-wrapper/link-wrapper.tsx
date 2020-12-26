@@ -13,7 +13,7 @@ const LinkWrapper: React.FC<LinkWrapperProps> = ({
   children
 }) => {
   // Broken link
-  if (href[0] === '#') return <>{children}</>;
+  if (!href || href[0] === '#') return <>{children}</>;
 
   // Internal link
   if (href[0] === '/')
