@@ -13,7 +13,17 @@ const LinkWrapper: React.FC<LinkWrapperProps> = ({
   children
 }) => {
   // Broken link
-  if (!href || href[0] === '#') return <>{children}</>;
+  if (!href) return <>{children}</>;
+
+  // Anchor link
+  // TODO: Add JS override to fix issue with sticky header
+  if (href[0] === '#') {
+    return (
+      <a className={className} href={href}>
+        {children}
+      </a>
+    );
+  }
 
   // Internal link
   if (href[0] === '/')

@@ -19,6 +19,7 @@ declare module 'styled-components' {
       heading: string;
       primary: string;
       secondary: string;
+      link: string;
     };
     button: {
       background: string;
@@ -29,6 +30,26 @@ declare module 'styled-components' {
       background: string;
       border: string;
       focus_border: string;
+    };
+    code: {
+      background_light: string;
+      background_dark: string;
+      colors: {
+        tag: string;
+        string: string;
+        keyword: string;
+        selector: string;
+        property: string;
+        number: string;
+        comment: string;
+        function: string;
+        classname: string;
+        variable: string;
+      };
+    };
+    blockquote: {
+      color: string;
+      border: string;
     };
   }
 }

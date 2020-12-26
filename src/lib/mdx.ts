@@ -5,6 +5,7 @@ import { IFrontMatter } from '../models/front-matter';
 import { IDataItem } from '../models/data-item';
 import { MdxRemote } from 'next-mdx-remote/types';
 import renderToString from 'next-mdx-remote/render-to-string';
+import remarkSlug from 'remark-slug';
 import mdxPrism from 'mdx-prism';
 import mdxComponents from '../components/mdx-components';
 
@@ -30,7 +31,7 @@ const getFileData = async (file: string, slug: string): Promise<IDataItem> => {
   const frontMatter: IFrontMatter = {
     title: data.title,
     summary: data.summary,
-    slug,
+    slug: slug.replace('.mdx', ''),
     date: data.date || null
   };
 
@@ -39,6 +40,7 @@ const getFileData = async (file: string, slug: string): Promise<IDataItem> => {
     components: mdxComponents,
     scope: data,
     mdxOptions: {
+      remarkPlugins: [remarkSlug],
       rehypePlugins: [mdxPrism]
     }
   });
