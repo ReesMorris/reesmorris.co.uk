@@ -3,6 +3,8 @@ import { MDXProvider as ActualMDXProvider } from '@mdx-js/react';
 import Heading from '../heading';
 import LinkWrapper from '../link-wrapper';
 import Text from '../text';
+import List from '../list';
+import ListItem from '../list-item';
 
 const MDXProvider = (props: any) => {
   const state = {
@@ -12,7 +14,9 @@ const MDXProvider = (props: any) => {
     h4: props => <Heading as='h4' {...props} />,
     p: props => <Text as='p' {...props} />,
     a: props => <LinkWrapper {...props} />,
-    img: props => <image {...props} />
+    ul: props => <List as='ul' {...props} />,
+    ol: props => <List as='ol' {...props} />,
+    li: props => <ListItem {...props} />
   };
 
   return (

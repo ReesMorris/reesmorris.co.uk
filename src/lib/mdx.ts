@@ -11,6 +11,7 @@ const dataPath = 'src/data';
 
 type types = 'blog';
 export const getFiles = async (type: types): Promise<string[]> => {
+  console.log(path.join(root, dataPath, type));
   return fs.readdirSync(path.join(root, dataPath, type));
 };
 
