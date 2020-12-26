@@ -6,7 +6,7 @@ import { IDataItem } from '../models/data-item';
 import { MdxRemote } from 'next-mdx-remote/types';
 import renderToString from 'next-mdx-remote/render-to-string';
 import mdxPrism from 'mdx-prism';
-import Heading from '../components/heading';
+import mdxComponents from '../components/mdx-components';
 
 const root = process.cwd();
 const dataPath = 'src/data';
@@ -36,7 +36,7 @@ const getFileData = async (file: string, slug: string): Promise<IDataItem> => {
 
   // Format MDXSource
   const mdxSource: MdxRemote.Source = await renderToString(content, {
-    components: { Heading },
+    components: mdxComponents,
     scope: data,
     mdxOptions: {
       rehypePlugins: [mdxPrism]
