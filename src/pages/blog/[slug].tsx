@@ -8,6 +8,7 @@ import Wrapper from '../../components/wrapper';
 import Heading from '../../components/heading';
 import mdxComponents from '../../components/mdx-components';
 import MDXProvider from '../../components/mdx-provider';
+import SEO from '../../seo';
 
 interface BlogPostProps {
   post: IDataItem;
@@ -18,6 +19,13 @@ const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
 
   return (
     <Page>
+      <SEO
+        title={post.frontMatter.title}
+        description={post.frontMatter.summary}
+        canonical={`https://reesmorris.co.uk/blog/${post.frontMatter.slug}`}
+        type='article'
+        publishedTime={post.frontMatter.date}
+      />
       <Wrapper>
         <Heading>{post.frontMatter.title}</Heading>
         <MDXProvider>{content}</MDXProvider>

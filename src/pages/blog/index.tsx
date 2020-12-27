@@ -10,6 +10,7 @@ import Text from '../../components/text';
 import Wrapper from '../../components/wrapper';
 import { getFiles } from '../../lib/mdx';
 import { IDataItem } from '../../models/data-item';
+import SEO from '../../seo';
 
 interface BlogProps {
   posts: IDataItem[];
@@ -30,6 +31,11 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
 
   return (
     <Page>
+      <SEO
+        title='Blog'
+        description='My takes on technology, gaming, the future, and everything between.'
+        canonical='https://reesmorris.co.uk/blog'
+      />
       <Wrapper>
         <Container>
           <Container small>
