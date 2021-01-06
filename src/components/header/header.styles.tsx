@@ -5,7 +5,7 @@ const Header = styled.header`
   /* position: sticky; */
   top: 0;
   z-index: 10;
-  padding: 4rem;
+  padding: 4rem 0;
   background: ${props => props.theme.site.background};
 `;
 
