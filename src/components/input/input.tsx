@@ -1,5 +1,4 @@
 import React from 'react';
-import Icon from '../icon';
 import { IconProps } from '../icon/icon';
 import Styles from './input.styles';
 
