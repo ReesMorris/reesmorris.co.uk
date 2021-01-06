@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import LinkWrapper from '../link-wrapper';
 
 const Header = styled.header`
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   z-index: 10;
   padding: 4rem;

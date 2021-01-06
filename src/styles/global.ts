@@ -34,6 +34,7 @@ export default css`
 
     &:hover {
       text-decoration: underline;
+      text-decoration-color: ${props => props.theme.colors.secondary};
     }
   }
 
