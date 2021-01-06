@@ -1,6 +1,7 @@
 import React from 'react';
+import Head from 'next/head';
 import { NextSeo } from 'next-seo';
-import { OpenGraph } from 'next-seo/lib/types';
+import { useRouter } from 'next/dist/client/router';
 
 interface SEOProps {
   title: string;
@@ -8,6 +9,7 @@ interface SEOProps {
   canonical?: string;
   type?: 'basic' | 'article';
   publishedTime?: string;
+  emoji?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -15,32 +17,45 @@ const SEO: React.FC<SEOProps> = ({
   description,
   canonical,
   type = 'basic',
-  publishedTime
+  publishedTime,
+  emoji
 }) => {
+  const router = useRouter();
+  console.log(router);
   return (
-    <NextSeo
-      title={title}
-      titleTemplate='%s · Rees Morris'
-      description={description}
-      canonical={canonical}
-      openGraph={{
-        url: canonical,
-        type,
-        title,
-        description,
-        locale: 'en_GB',
-        site_name: 'Rees Morris',
-        article:
-          type === 'article'
-            ? { publishedTime, authors: ['Rees Morris'] }
-            : undefined
-      }}
-      twitter={{
-        cardType: 'summary',
-        site: 'reesmorris',
-        handle: 'reesmorris'
-      }}
-    />
+    <>
+      <Head>
+        <link
+          rel='icon'
+          href={`data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${
+            emoji || `🧔🏻`
+          }</text></svg>`}
+        />
+      </Head>
+      <NextSeo
+        title={title}
+        titleTemplate='%s · Rees Morris'
+        description={description}
+        canonical={canonical}
+        openGraph={{
+          url: canonical,
+          type,
+          title,
+          description,
+          locale: 'en_GB',
+          site_name: 'Rees Morris',
+          article:
+            type === 'article'
+              ? { publishedTime, authors: ['Rees Morris'] }
+              : undefined
+        }}
+        twitter={{
+          cardType: 'summary',
+          site: 'reesmorris',
+          handle: 'reesmorris'
+        }}
+      />
+    </>
   );
 };
 

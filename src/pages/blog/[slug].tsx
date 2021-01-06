@@ -25,6 +25,7 @@ const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
         canonical={`https://reesmorris.co.uk/blog/${post.frontMatter.slug}`}
         type='article'
         publishedTime={post.frontMatter.date}
+        emoji='📝'
       />
       <Wrapper>
         <Heading>{post.frontMatter.title}</Heading>

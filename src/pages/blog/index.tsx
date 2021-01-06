@@ -35,6 +35,7 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
         title='Blog'
         description='My takes on technology, gaming, the future, and everything between.'
         canonical='https://reesmorris.co.uk/blog'
+        emoji='📝'
       />
       <Wrapper>
         <Container>
