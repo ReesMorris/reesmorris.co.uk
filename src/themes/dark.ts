@@ -40,8 +40,8 @@ const theme: DefaultTheme = {
     }
   },
   blockquote: {
-    color: 'red',
-    border: 'red'
+    color: '#8b949e',
+    border: '#3c4854'
   }
 };
 
