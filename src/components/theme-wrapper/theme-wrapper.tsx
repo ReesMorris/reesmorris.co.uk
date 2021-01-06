@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { light, dark } from '../../themes';
 import GlobalStyle from '../../styles';
@@ -15,10 +15,16 @@ interface ThemeWrapperProps {
 const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ children }) => {
   const [theme, setTheme] = useState(light);
 
+  useEffect(() => {
+    if (window.localStorage.getItem('theme') === 'dark') setTheme(dark);
+  }, []);
+
   const changeTheme = () => {
+    const newTheme = theme === light ? dark : light;
+    setTheme(newTheme);
     document.body.classList.add('theme-transition');
-    setTheme(theme === light ? dark : light);
     setTimeout(() => document.body.classList.remove('theme-transition'), 150);
+    window.localStorage.setItem('theme', newTheme.name);
   };
 
   return (
