@@ -1,7 +1,6 @@
 import React from 'react';
 import Head from 'next/head';
 import { NextSeo } from 'next-seo';
-import { useRouter } from 'next/dist/client/router';
 
 interface SEOProps {
   title?: string;
@@ -20,8 +19,6 @@ const SEO: React.FC<SEOProps> = ({
   publishedTime,
   emoji
 }) => {
-  const router = useRouter();
-  console.log(router);
   return (
     <>
       <Head>
