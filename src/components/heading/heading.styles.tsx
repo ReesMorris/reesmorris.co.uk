@@ -7,8 +7,12 @@ interface HeadingProps {
 const Heading = styled.h1<HeadingProps>`
   font-weight: 700;
   color: ${props => props.theme.colors.heading};
-  margin-bottom: 1.6rem;
 
+  margin-bottom: ${props =>
+    (props.design === 'h1' && '1.6rem') ||
+    (props.design === 'h2' && '1.0rem') ||
+    (props.design === 'h3' && '0.6rem') ||
+    '0rem'};
   font-size: ${props =>
     (props.design === 'h1' && '3.2rem') ||
     (props.design === 'h2' && '2.4rem') ||
