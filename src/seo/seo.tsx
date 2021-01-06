@@ -4,7 +4,7 @@ import { NextSeo } from 'next-seo';
 import { useRouter } from 'next/dist/client/router';
 
 interface SEOProps {
-  title: string;
+  title?: string;
   description?: string;
   canonical?: string;
   type?: 'basic' | 'article';
@@ -33,8 +33,7 @@ const SEO: React.FC<SEOProps> = ({
         />
       </Head>
       <NextSeo
-        title={title}
-        titleTemplate='%s · Rees Morris'
+        title={title ? `${title} · Rees Morris` : 'Rees Morris'}
         description={description}
         canonical={canonical}
         openGraph={{

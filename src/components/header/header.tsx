@@ -15,11 +15,6 @@ const Header: React.FC = () => {
                 Home
               </Text>
             </Styles.NavLink>
-            <Styles.NavLink href='/about'>
-              <Text as='span' dark>
-                About
-              </Text>
-            </Styles.NavLink>
             <Styles.NavLink href='/blog'>
               <Text as='span' dark>
                 Blog
