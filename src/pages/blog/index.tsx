@@ -42,6 +42,8 @@ const Blog: React.FC<BlogProps> = ({ posts }) => {
             <Heading>Blog</Heading>
             <Text>
               I love to write about technology, games, and everything inbetween.
+              Feel free to browse any of the {posts.length} posts I&apos;ve
+              written to date.
             </Text>
             <NoScript>
               <style>{`#search {display: none;}`}</style>
