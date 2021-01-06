@@ -21,9 +21,9 @@ const Header: React.FC = () => {
               </Text>
             </Styles.NavLink>
           </Styles.Nav>
-          <Styles.Aside>
+          <Styles.AsideNav>
             <ToggleThemeButton />
-          </Styles.Aside>
+          </Styles.AsideNav>
         </Styles.Content>
       </Wrapper>
     </Styles.Header>

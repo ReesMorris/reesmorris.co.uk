@@ -28,8 +28,10 @@ const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
         emoji='📝'
       />
       <Wrapper>
-        <Heading>{post.frontMatter.title}</Heading>
-        <MDXProvider>{content}</MDXProvider>
+        <article>
+          <Heading>{post.frontMatter.title}</Heading>
+          <MDXProvider>{content}</MDXProvider>
+        </article>
       </Wrapper>
     </Page>
   );

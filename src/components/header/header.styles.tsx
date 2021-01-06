@@ -23,8 +23,8 @@ const NavLink = styled(LinkWrapper)`
   }
 `;
 
-const Aside = styled.aside`
+const AsideNav = styled.nav`
   display: flex;
 `;
 
-export default { Header, Content, Nav, NavLink, Aside };
+export default { Header, Content, Nav, NavLink, AsideNav };

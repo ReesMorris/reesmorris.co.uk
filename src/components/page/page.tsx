@@ -10,7 +10,7 @@ const Page: React.FC<PageProps> = ({ children }) => {
   return (
     <>
       <Header />
-      {children}
+      <main>{children}</main>
       <Footer />
     </>
   );
