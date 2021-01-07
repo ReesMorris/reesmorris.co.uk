@@ -28,7 +28,7 @@ const Index: React.FC = () => {
           </Text>
           <Text>
             I mostly spend my free time listening to indie-pop music, making and
-            playing video games, enthusing Index new technologies, and coming up
+            playing video games, enthusing about new technologies, and coming up
             with daft ideas and schemes for new projects.
           </Text>
         </Container>
