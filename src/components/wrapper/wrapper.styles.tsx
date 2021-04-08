@@ -14,10 +14,10 @@ const Wrapper = styled.div<WrapperProps>`
 
   @media (max-width: ${props =>
       (props.type === 'header' &&
-        parseInt(props.theme._consts.widths.header_width) * 1 + 50) ||
-      parseInt(props.theme._consts.widths.body_width) * 1 + 50}px) {
+        parseInt(props.theme._consts.widths.header_width) * 1 + 70) ||
+      parseInt(props.theme._consts.widths.body_width) * 1 + 70}px) {
     width: 100%;
-    padding: 0 5rem;
+    padding: 0 3.5rem;
   }
 `;
 

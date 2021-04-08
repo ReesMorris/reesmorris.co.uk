@@ -5,12 +5,16 @@ export interface IWidths {
   header_width: string;
   body_width: string;
 }
+export interface IPaddings {
+  tablist_padding: string;
+}
 
 declare module 'styled-components' {
   export interface DefaultTheme {
     name: string;
     _consts: {
       widths: IWidths;
+      paddings: IPaddings;
     };
     site: {
       background: string;
@@ -30,6 +34,19 @@ declare module 'styled-components' {
       background: string;
       border: string;
       focus_border: string;
+    };
+    tablist: {
+      border: string;
+      tab: {
+        marker: string;
+        active_text: string;
+      };
+    };
+    note: {
+      info: {
+        background: string;
+        color: string;
+      };
     };
     code: {
       background_light: string;

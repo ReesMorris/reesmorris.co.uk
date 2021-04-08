@@ -2,6 +2,7 @@ import React from 'react';
 import { AppProps } from 'next/app';
 import ThemeWrapper from '../components/theme-wrapper';
 import useIsTabbing from '../components/hooks/use-is-tabbing';
+import TabsProvider from '../contexts/tabs';
 import '../utils/font-awesome';
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
@@ -9,7 +10,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
   return (
     <ThemeWrapper>
-      <Component {...pageProps} />
+      <TabsProvider>
+        <Component {...pageProps} />
+      </TabsProvider>
     </ThemeWrapper>
   );
 };

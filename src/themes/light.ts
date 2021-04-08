@@ -11,7 +11,7 @@ const theme: DefaultTheme = {
     heading: '#000000',
     primary: '#000000',
     secondary: '#2d3748',
-    link: '#0366d6'
+    link: '#1a73e8'
   },
   button: {
     background: '#ffffff',
@@ -22,6 +22,19 @@ const theme: DefaultTheme = {
     background: '#ffffff',
     border: '#e5e7eb',
     focus_border: '#71b0dc'
+  },
+  tablist: {
+    border: '#e5e7eb',
+    tab: {
+      marker: '#5f6368',
+      active_text: '#1a73e8'
+    }
+  },
+  note: {
+    info: {
+      background: '#f1f1f1',
+      color: '#2d3748'
+    }
   },
   code: {
     background_light: '#f3f4f4',
