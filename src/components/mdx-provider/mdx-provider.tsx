@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/display-name */
 import React from 'react';
 import { MDXProvider as ActualMDXProvider } from '@mdx-js/react';
@@ -12,7 +13,7 @@ interface MDXProviderProps {
   children: React.ReactNode;
 }
 
-const MDXProvider: React.FC<MDXProviderProps> = ({ children }) => {
+const MDXProvider = ({ children }: MDXProviderProps) => {
   const components = {
     h1: (props: any) => <Heading as='h1' {...props} />,
     h2: (props: any) => <Heading as='h2' {...props} />,

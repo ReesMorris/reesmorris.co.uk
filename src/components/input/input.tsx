@@ -13,7 +13,7 @@ interface InputTypes {
   onChange?: ((event: React.ChangeEvent<HTMLInputElement>) => void) | undefined;
 }
 
-const Input: React.FC<InputTypes> = ({
+const Input = ({
   as,
   type = 'text',
   placeholder,
@@ -22,7 +22,7 @@ const Input: React.FC<InputTypes> = ({
   name,
   iconLeft,
   onChange
-}) => {
+}: InputTypes) => {
   return (
     <Styles.InputWrapper id={id}>
       {iconLeft && <Styles.Icon icon='search' />}

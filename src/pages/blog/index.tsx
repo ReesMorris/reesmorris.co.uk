@@ -16,7 +16,7 @@ interface BlogProps {
   posts: IDataItem[];
 }
 
-const Blog: React.FC<BlogProps> = ({ posts }) => {
+const Blog = ({ posts }: BlogProps) => {
   const [searchInput, setSearchInput] = useState('');
 
   const sorted = posts

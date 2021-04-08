@@ -5,7 +5,7 @@ interface BlockquoteProps {
   children: React.ReactNode;
 }
 
-const Blockquote: React.FC<BlockquoteProps> = ({ children }) => {
+const Blockquote = ({ children }: BlockquoteProps) => {
   return <Styles.Blockquote>{children}</Styles.Blockquote>;
 };
 export default Blockquote;

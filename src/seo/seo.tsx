@@ -11,14 +11,14 @@ interface SEOProps {
   emoji?: string;
 }
 
-const SEO: React.FC<SEOProps> = ({
+const SEO = ({
   title,
   description,
   canonical,
   type = 'basic',
   publishedTime,
   emoji
-}) => {
+}: SEOProps) => {
   return (
     <>
       <Head>

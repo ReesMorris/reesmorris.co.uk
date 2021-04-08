@@ -7,7 +7,7 @@ interface TabListProps {
   children: React.ReactNode;
 }
 
-const TabList: React.FC<TabListProps> = ({ tabs, children }) => {
+const TabList = ({ tabs, children }: TabListProps) => {
   const { lastChoice, setTab } = useTabs();
   const [selected, setSelected] = useState(0);
 

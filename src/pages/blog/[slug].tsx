@@ -14,7 +14,7 @@ interface BlogPostProps {
   post: IDataItem;
 }
 
-const BlogPost: React.FC<BlogPostProps> = ({ post }) => {
+const BlogPost = ({ post }: BlogPostProps) => {
   const content = hydrate(post.mdxSource, { components: mdxComponents });
 
   return (

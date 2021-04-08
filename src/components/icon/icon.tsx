@@ -7,20 +7,11 @@ export interface IconProps {
   weight?: IconPrefix;
   title?: string;
 }
-
-interface LocalIconProps {
-  icon: IconName;
-  weight?: IconPrefix;
-  title?: string;
+interface LocalIconProps extends IconProps {
   className?: string;
 }
 
-const Icon: React.FC<LocalIconProps> = ({
-  icon,
-  weight = 'fal',
-  title,
-  className
-}) => {
+const Icon = ({ icon, weight = 'fal', title, className }: LocalIconProps) => {
   return (
     <Styles.Icon
       icon={[weight, icon]}

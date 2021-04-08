@@ -9,13 +9,7 @@ interface FormProps {
   children: React.ReactNode;
 }
 
-const Form: React.FC<FormProps> = ({
-  method,
-  action,
-  className,
-  onSubmit,
-  children
-}) => {
+const Form = ({ method, action, className, onSubmit, children }: FormProps) => {
   return (
     <Styles.Form
       method={method}

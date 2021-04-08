@@ -2,11 +2,11 @@ import React from 'react';
 import Text from '../text';
 import Styles from './list-item.styles';
 
-interface ListProps {
+interface ListItemProps {
   children: React.ReactNode;
 }
 
-const List: React.FC<ListProps> = ({ children }) => {
+const ListItem = ({ children }: ListItemProps) => {
   return (
     <Styles.ListItem>
       <Text as='span'>{children}</Text>
@@ -14,4 +14,4 @@ const List: React.FC<ListProps> = ({ children }) => {
   );
 };
 
-export default List;
+export default ListItem;

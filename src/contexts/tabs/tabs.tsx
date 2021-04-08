@@ -17,7 +17,7 @@ const TabsContext = createContext<ContextProps>({
 });
 
 // The component
-const TabsProvider: React.FC<TabsProps> = ({ children }) => {
+const TabsProvider = ({ children }: TabsProps) => {
   const [tabs, setTabs] = useState<StateProps>({
     lastChoice: ''
   });

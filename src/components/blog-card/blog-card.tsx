@@ -8,7 +8,7 @@ interface BlogCardProps {
   frontMatter: IFrontMatter;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ frontMatter }) => {
+const BlogCard = ({ frontMatter }: BlogCardProps) => {
   const { title, summary, slug } = frontMatter;
 
   return (

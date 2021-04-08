@@ -1,5 +1,7 @@
+import React from 'react';
 import Document, {
   DocumentContext,
+  DocumentInitialProps,
   Head,
   Html,
   Main,
@@ -7,8 +9,12 @@ import Document, {
 } from 'next/document';
 import { ServerStyleSheet } from 'styled-components';
 
+interface InitialProps extends DocumentInitialProps {
+  styles: React.ReactElement;
+}
+
 export default class MyDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext): Promise<any> {
+  static async getInitialProps(ctx: DocumentContext): Promise<InitialProps> {
     const sheet = new ServerStyleSheet();
     const originalRenderPage = ctx.renderPage;
 
@@ -33,7 +39,7 @@ export default class MyDocument extends Document {
     }
   }
 
-  render(): any {
+  render() {
     return (
       <Html lang='en-GB'>
         <Head />

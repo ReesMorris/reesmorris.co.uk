@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React from 'react';
 import Link from 'next/link';
 
@@ -7,11 +8,7 @@ interface LinkWrapperProps {
   children: React.ReactNode;
 }
 
-const LinkWrapper: React.FC<LinkWrapperProps> = ({
-  href,
-  className,
-  children
-}) => {
+const LinkWrapper = ({ href, className, children }: LinkWrapperProps) => {
   // Broken link
   if (!href) return <>{children}</>;
 

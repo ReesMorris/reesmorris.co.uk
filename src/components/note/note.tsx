@@ -9,7 +9,7 @@ interface NoteProps {
   children: React.ReactNode;
 }
 
-const Note: React.FC<NoteProps> = ({ type, icon, children }) => {
+const Note = ({ type, icon, children }: NoteProps) => {
   return (
     <Styles.Note $type={type}>
       {icon && (

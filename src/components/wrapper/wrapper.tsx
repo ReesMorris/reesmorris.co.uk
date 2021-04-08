@@ -6,7 +6,7 @@ interface WrapperProps {
   children: React.ReactNode;
 }
 
-const Wrapper: React.FC<WrapperProps> = ({ type = 'body', children }) => {
+const Wrapper = ({ type = 'body', children }: WrapperProps) => {
   return <Styles.Wrapper type={type}>{children}</Styles.Wrapper>;
 };
 

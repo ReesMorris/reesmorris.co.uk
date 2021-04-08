@@ -9,13 +9,13 @@ interface HeadingProps {
   children?: React.ReactNode;
 }
 
-const Heading: React.FC<HeadingProps> = ({
+const Heading = ({
   as = 'h1',
   design,
   id,
   className,
   children
-}) => {
+}: HeadingProps) => {
   return (
     <Styles.Heading as={as} design={design || as} id={id} className={className}>
       {children}

@@ -5,7 +5,7 @@ interface NoScriptProps {
   children: React.ReactElement;
 }
 
-const NoScript: React.FC<NoScriptProps> = ({ children }) => {
+const NoScript = ({ children }: NoScriptProps) => {
   const staticMarkup = ReactDOM.renderToStaticMarkup(children);
   return <noscript dangerouslySetInnerHTML={{ __html: staticMarkup }} />;
 };

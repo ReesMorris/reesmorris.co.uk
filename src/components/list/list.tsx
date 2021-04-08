@@ -6,7 +6,7 @@ interface ListProps {
   children: React.ReactNode;
 }
 
-const List: React.FC<ListProps> = ({ as, children }) => {
+const List = ({ as, children }: ListProps) => {
   return <Styles.List as={as}>{children}</Styles.List>;
 };
 

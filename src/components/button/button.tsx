@@ -15,7 +15,7 @@ interface ButtonProps {
     | undefined;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Button = ({
   as,
   id,
   icon,
@@ -23,7 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   hideText,
   className,
   onClick
-}) => {
+}: ButtonProps) => {
   return (
     <Styles.Button
       as={as || 'button'}

@@ -10,14 +10,14 @@ interface TextProps {
   children: React.ReactNode;
 }
 
-const Text: React.FC<TextProps> = ({
+const Text = ({
   as = 'p',
   design,
   bold,
   dark,
   className,
   children
-}) => {
+}: TextProps) => {
   return (
     <Styles.Text
       as={as}

@@ -12,7 +12,7 @@ export const ThemeContext = React.createContext<Partial<ThemeContextProps>>({});
 interface ThemeWrapperProps {
   children: React.ReactNode;
 }
-const ThemeWrapper: React.FC<ThemeWrapperProps> = ({ children }) => {
+const ThemeWrapper = ({ children }: ThemeWrapperProps) => {
   const [theme, setTheme] = useState(light);
 
   useEffect(() => {

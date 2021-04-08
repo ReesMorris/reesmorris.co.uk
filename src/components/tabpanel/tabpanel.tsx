@@ -5,7 +5,7 @@ interface TabPanelProps {
   children: React.ReactNode;
 }
 
-const TabPanel: React.FC<TabPanelProps> = ({ children, ...rest }) => {
+const TabPanel = ({ children, ...rest }: TabPanelProps) => {
   return <Styles.TabPanel {...rest}>{children}</Styles.TabPanel>;
 };
 

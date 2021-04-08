@@ -1,22 +1,33 @@
 {
-  "parser": "@typescript-eslint/parser",
-  "extends": [
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended"
-  ],
-  "plugins": ["@typescript-eslint", "react"],
-  "rules": {
-    "react/react-in-jsx-scope": "off"
+  "root": true,
+  "env": {
+    "node": true,
+    "es6": true
   },
-  "globals": {
-    "React": "writable"
-  },
+  "parserOptions": { "ecmaVersion": 8 },
+  "ignorePatterns": ["node_modules/*", ".next/*", ".out/*", "!.prettierrc.js"],
+  "extends": ["eslint:recommended"],
   "overrides": [
     {
-      "files": ["**/*.tsx"],
+      "files": ["**/*.ts", "**/*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "settings": { "react": { "version": "detect" } },
+      "env": {
+        "browser": true,
+        "node": true,
+        "es6": true
+      },
+      "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:jsx-a11y/recommended",
+        "plugin:prettier/recommended"
+      ],
       "rules": {
-        "react/prop-types": "off", // see https://github.com/yannickcr/eslint-plugin-react/issues/2353
-        "@typescript-eslint/no-explicit-any": "off"
+        "@typescript-eslint/explicit-module-boundary-types": "off",
+        "react-hooks/exhaustive-deps": "off"
       }
     }
   ]

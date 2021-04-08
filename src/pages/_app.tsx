@@ -5,7 +5,7 @@ import useIsTabbing from '../components/hooks/use-is-tabbing';
 import TabsProvider from '../contexts/tabs';
 import '../utils/font-awesome';
 
-const App: React.FC<AppProps> = ({ Component, pageProps }) => {
+const App = ({ Component, pageProps }: AppProps) => {
   useIsTabbing();
 
   return (
