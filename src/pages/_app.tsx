@@ -3,7 +3,7 @@ import { AppProps } from 'next/app';
 import ThemeWrapper from '../components/theme-wrapper';
 import useIsTabbing from '../components/hooks/use-is-tabbing';
 import TabsProvider from '../contexts/tabs';
-import '../utils/font-awesome';
+import '../libs/fontawesome';
 
 const App = ({ Component, pageProps }: AppProps) => {
   useIsTabbing();
