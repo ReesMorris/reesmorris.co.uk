@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ThemeProvider as TP, DefaultTheme } from 'styled-components';
 import { light, dark, Theme } from '../../themes';
 import { getCookie, setCookie } from '../../utils/cookies';
@@ -39,6 +39,12 @@ const ThemeProvider = ({ initialTheme, children }: ThemeProps) => {
       expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
     });
   };
+
+  // Set the theme based on the cookie when component mounts
+  useEffect(() => {
+    const themeCookie = getCookie('theme');
+    if (themeCookie && themeCookie in mappings) setTheme(themeCookie as Theme);
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
