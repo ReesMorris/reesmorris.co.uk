@@ -1,28 +1,23 @@
 import React from 'react';
 import Button from '../button';
 import NoScript from '../noscript';
-import { ThemeContext } from '../theme-wrapper/theme-wrapper';
+import { useTheme } from '../../contexts/theme/theme';
 
 const ToggleThemeButton: React.FC = () => {
+  const { theme, setTheme } = useTheme();
   return (
-    <ThemeContext.Consumer>
-      {({ theme, changeTheme }) => (
-        <>
-          <NoScript>
-            <style>{`#toggle-theme-button {display: none;}`}</style>
-          </NoScript>
-          <Button
-            id='toggle-theme-button'
-            icon={{ icon: theme?.name === 'light' ? 'sun' : 'moon' }}
-            text={`Change to ${
-              theme?.name === 'dark' ? 'light' : 'dark'
-            } theme`}
-            hideText
-            onClick={changeTheme}
-          />
-        </>
-      )}
-    </ThemeContext.Consumer>
+    <>
+      <NoScript>
+        <style>{`#toggle-theme-button {display: none;}`}</style>
+      </NoScript>
+      <Button
+        id='toggle-theme-button'
+        icon={{ icon: theme.name === 'light' ? 'sun' : 'moon' }}
+        text={`Change to ${theme.name === 'dark' ? 'light' : 'dark'} theme`}
+        hideText
+        onClick={() => setTheme(theme.name === 'light' ? 'dark' : 'light')}
+      />
+    </>
   );
 };
 
