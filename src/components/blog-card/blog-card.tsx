@@ -1,15 +1,15 @@
 import React from 'react';
-import { IFrontMatter } from '../../models/front-matter';
+import { IFileMetadata } from '../../utils/mdx/mdx';
 import Heading from '../heading';
 import Text from '../text';
 import Styles from './blog-card.styles';
 
 interface BlogCardProps {
-  frontMatter: IFrontMatter;
+  metadata: IFileMetadata;
 }
 
-const BlogCard = ({ frontMatter }: BlogCardProps) => {
-  const { title, summary, slug } = frontMatter;
+const BlogCard = ({ metadata }: BlogCardProps) => {
+  const { title, summary, slug } = metadata;
 
   return (
     <Styles.BlogCard>

@@ -1,53 +1,55 @@
-// import React from 'react';
-// import { GetStaticPaths, GetStaticProps } from 'next';
-// import hydrate from 'next-mdx-remote/hydrate';
-// import { IDataItem } from '../../models/data-item';
-// import { getFilesByType, getFile } from '../../lib/mdx';
-// import Page from '../../components/page';
-// import Wrapper from '../../components/wrapper';
-// import Heading from '../../components/heading';
-// import mdxComponents from '../../components/mdx-components';
-// import MDXProvider from '../../components/mdx-provider';
-// import SEO from '../../seo';
+import React from 'react';
+import { GetStaticPaths, GetStaticProps } from 'next';
+import hydrate from 'next-mdx-remote/hydrate';
+import { MdxRemote } from 'next-mdx-remote/types';
+import { getFile, getFilesInDirectory, IFile } from '../../utils/mdx';
+import components from '../../utils/mdx/components';
+import Page from '../../components/page';
+import SEO from '../../seo';
+import Wrapper from '../../components/wrapper';
+import Heading from '../../components/heading';
 
-// interface BlogPostProps {
-//   post: IDataItem;
-// }
+interface BlogPostProps {
+  post: IFile;
+}
 
-// const BlogPost = ({ post }: BlogPostProps) => {
-//   const content = hydrate(post.mdxSource, { components: mdxComponents });
+const BlogPost = ({ post }: BlogPostProps) => {
+  const content = hydrate(post.source as MdxRemote.Source, {
+    components
+  });
 
-//   return (
-//     <Page>
-//       <SEO
-//         title={post.frontMatter.title}
-//         description={post.frontMatter.summary}
-//         canonical={`https://reesmorris.co.uk/blog/${post.frontMatter.slug}`}
-//         type='article'
-//         publishedTime={post.frontMatter.date}
-//         emoji='📝'
-//       />
-//       <Wrapper>
-//         <article>
-//           <Heading>{post.frontMatter.title}</Heading>
-//           <MDXProvider>{content}</MDXProvider>
-//         </article>
-//       </Wrapper>
-//     </Page>
-//   );
-// };
+  return (
+    <Page>
+      <SEO
+        title={post.metadata.title}
+        description={post.metadata.summary}
+        canonical={`https://reesmorris.co.uk/blog/${post.metadata.slug}`}
+        type='article'
+        publishedTime={post.metadata.date}
+        emoji='📝'
+      />
+      <Wrapper>
+        <article>
+          <Heading>{post.metadata.title}</Heading>
+          {content}
+        </article>
+      </Wrapper>
+    </Page>
+  );
+};
 
-// export default BlogPost;
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths = await getFilesInDirectory('blog');
 
-// export const getStaticPaths: GetStaticPaths = async () => {
-//   const paths = await getFilesByType('blog');
-//   return {
-//     paths: paths.map(p => ({ params: { slug: p.replace(/\.mdx/, '') } })),
-//     fallback: false
-//   };
-// };
+  return {
+    paths: paths.map(path => ({ params: { slug: path.replace('.mdx', '') } })),
+    fallback: false
+  };
+};
 
-// export const getStaticProps: GetStaticProps = async ({ params }) => {
-//   const post = await getFile('blog', `${params?.slug}.mdx`);
-//   return { props: { post } };
-// };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const post = await getFile('blog', `${params?.slug}.mdx`, true);
+  return { props: { post } };
+};
+
+export default BlogPost;
