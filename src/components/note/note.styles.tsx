@@ -11,8 +11,7 @@ const Note = styled.div<NoteProps>`
   padding: 2rem;
   border-radius: 0.6rem;
   border: 0.5rem solid
-    ${props => props.$type === 'info' && themeVar('color-note-info-bg')};
-  color: ${props => props.$type === 'info' && themeVar('color-note-info')};
+    ${props => props.$type === 'info' && themeVar('color-note-info-border')};
 
   &:not(:last-child) {
     margin-bottom: 2rem;

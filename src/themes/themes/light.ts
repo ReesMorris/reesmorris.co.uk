@@ -22,8 +22,7 @@ const light: Theme = {
     'color-content-border-focus': '#71b0dc',
 
     // Notes
-    'color-note-info': '#f1f1f1',
-    'color-note-info-bg': '#2d3748',
+    'color-note-info-border': '#f1f1f1',
 
     // Code
     'color-code-bg-inline': '#f3f4f4',

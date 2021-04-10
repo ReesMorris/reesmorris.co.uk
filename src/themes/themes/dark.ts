@@ -22,8 +22,7 @@ const dark: Theme = {
     'color-content-border-focus': '#6a788a',
 
     // Notes
-    'color-note-info': '#e5e7eb',
-    'color-note-info-bg': '#121820',
+    'color-note-info-border': '#121820',
 
     // Code
     'color-code-bg-inline': '#2f3438',

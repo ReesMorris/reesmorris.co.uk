@@ -23,8 +23,7 @@ export interface ThemeStyles {
   'color-content-border-focus': Val;
 
   // Notes
-  'color-note-info': Val;
-  'color-note-info-bg': Val;
+  'color-note-info-border': Val;
 
   // Code
   'color-code-bg-inline': Val;
