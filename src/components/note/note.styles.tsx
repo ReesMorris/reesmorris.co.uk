@@ -7,11 +7,10 @@ interface NoteProps {
 }
 const Note = styled.div<NoteProps>`
   display: flex;
-  align-items: center;
   padding: 2rem;
   border-radius: 0.6rem;
-  background: ${props =>
-    props.$type === 'info' && props.theme.note.info.background};
+  border: 0.5rem solid
+    ${props => props.$type === 'info' && props.theme.note.info.background};
   color: ${props => props.$type === 'info' && props.theme.note.info.color};
 
   &:not(:last-child) {
@@ -19,14 +18,16 @@ const Note = styled.div<NoteProps>`
   }
 `;
 
+const Content = styled.div``;
+
 const IconContainer = styled.div`
   margin-right: 1.5rem;
   width: 2rem;
 `;
 
 const Icon = styled(UIIcon)`
-  margin-right: 1.5rem;
+  margin: 0.8rem 1.5rem 0 0;
   color: inherit;
 `;
 
-export default { Note, IconContainer, Icon };
+export default { Note, Content, IconContainer, Icon };

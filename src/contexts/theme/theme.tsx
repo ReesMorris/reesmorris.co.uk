@@ -31,8 +31,8 @@ const ThemeProvider = ({ initialTheme, children }: ThemeProps) => {
   );
 
   const setTheme = (theme: Theme) => {
-    body.addClass('theme-change');
-    setTimeout(() => body.removeClass('theme-change'), 150);
+    body.addClass('theme-transition');
+    setTimeout(() => body.removeClass('theme-transition'), 150);
 
     _setTheme(mappings[theme]);
     setCookie('theme', theme, {
