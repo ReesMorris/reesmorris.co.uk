@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
+import { themeVar } from '../../themes';
 
 const Blockquote = styled.blockquote`
-  border-left: 0.5rem solid ${props => props.theme.blockquote.border};
+  border-left: 0.5rem solid ${themeVar('color-content-border')};
   padding: 0 1.5rem;
 
   &,
   p,
   span {
-    color: ${props => props.theme.blockquote.color};
+    color: ${themeVar('color-secondary')};
   }
 
   &:not(:last-child) {

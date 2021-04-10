@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { themeVar } from '../../themes';
 
 interface HeadingProps {
   design: React.ElementType | string;
@@ -6,7 +7,7 @@ interface HeadingProps {
 
 const Heading = styled.h1<HeadingProps>`
   font-weight: 700;
-  color: ${props => props.theme.colors.heading};
+  color: ${themeVar('color-primary')};
 
   margin-bottom: ${props =>
     (props.design === 'h1' && '1.6rem') ||

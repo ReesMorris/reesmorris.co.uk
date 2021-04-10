@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { themeVar } from '../../themes';
 import LinkWrapper from '../link-wrapper';
 
 const Header = styled.header`
@@ -6,7 +7,7 @@ const Header = styled.header`
   top: 0;
   z-index: 10;
   padding: 4rem 0;
-  background: ${props => props.theme.site.background};
+  background: ${themeVar('color-site-bg')};
 `;
 
 const Content = styled.div`
@@ -18,8 +19,13 @@ const Nav = styled.nav``;
 
 const NavLink = styled(LinkWrapper)`
   padding: 1rem;
+
   &:not(:first-of-type) {
     margin-left: 2rem;
+  }
+
+  &:hover {
+    color: ${themeVar('color-primary')};
   }
 `;
 

@@ -1,6 +1,5 @@
 /* eslint-disable react/display-name */
 import React from 'react';
-import ThemeProvider from '../../contexts/theme';
 import Heading from '../../components/heading';
 import Text from '../../components/text';
 import LinkWrapper from '../../components/link-wrapper';
@@ -13,7 +12,6 @@ import TabPanel from '../../components/tabpanel';
 
 export default {
   // Markdown components
-  wrapper: (props: never) => <ThemeProvider {...props} />,
   h1: (props: never) => <Heading as='h1' {...props} />,
   h2: (props: never) => <Heading as='h2' {...props} />,
   h3: (props: never) => <Heading as='h3' {...props} />,
