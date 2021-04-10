@@ -1,22 +1,22 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ThemeProvider as TP, DefaultTheme } from 'styled-components';
-import { light, dark, Theme } from '../../themes';
+import { ThemeProvider as TP, Global, css } from '@emotion/react';
+import { Theme, light, dark, ThemeName } from '../../themes';
 import { getCookie, setCookie } from '../../utils/cookies';
-import GlobalStyle from '../../styles';
+import styles from '../../styles';
 import body from '../../utils/body';
 
 interface ThemeProps {
-  initialTheme?: Theme;
+  initialTheme?: ThemeName;
   children: React.ReactNode;
 }
 
 interface ContextProps {
-  theme: DefaultTheme;
-  setTheme: (theme: Theme) => void;
+  theme: Theme;
+  setTheme: (name: ThemeName) => void;
 }
 
 // Theme mappings
-const mappings: Record<Theme, DefaultTheme> = { light, dark };
+const mappings: Record<ThemeName, Theme> = { light, dark };
 
 // The context
 const ThemeContext = createContext<ContextProps>({
@@ -26,16 +26,17 @@ const ThemeContext = createContext<ContextProps>({
 
 // The component
 const ThemeProvider = ({ initialTheme, children }: ThemeProps) => {
-  const [theme, _setTheme] = useState<DefaultTheme>(
+  const [theme, _setTheme] = useState<Theme>(
     initialTheme ? mappings[initialTheme] : light
   );
 
-  const setTheme = (theme: Theme) => {
+  // Handler for changing themes
+  const setTheme = (name: ThemeName) => {
     body.addClass('theme-transition');
     setTimeout(() => body.removeClass('theme-transition'), 150);
 
-    _setTheme(mappings[theme]);
-    setCookie('theme', theme, {
+    _setTheme(mappings[name]);
+    setCookie('theme', name, {
       expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1))
     });
   };
@@ -43,13 +44,20 @@ const ThemeProvider = ({ initialTheme, children }: ThemeProps) => {
   // Set the theme based on the cookie when component mounts
   useEffect(() => {
     const themeCookie = getCookie('theme');
-    if (themeCookie && themeCookie in mappings) setTheme(themeCookie as Theme);
+    if (themeCookie && themeCookie in mappings)
+      setTheme(themeCookie as ThemeName);
   }, []);
+
+  console.log();
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
       <TP theme={theme}>
-        <GlobalStyle />
+        <Global
+          styles={css`
+            ${styles.reset} ${styles.global(theme)} ${styles.code(theme)}
+          `}
+        />
         {children}
       </TP>
     </ThemeContext.Provider>

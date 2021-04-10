@@ -7,8 +7,6 @@ import components from '../../utils/mdx/components';
 import Page from '../../components/page';
 import Wrapper from '../../components/wrapper';
 import Heading from '../../components/heading';
-import TabList from '../../components/tablist';
-import TabPanel from '../../components/tabpanel';
 
 interface BlogPostProps {
   post: IFile;

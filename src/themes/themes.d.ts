@@ -1,21 +1,22 @@
+import '@emotion/react';
 import 'styled-components';
-import { Theme } from '.';
 
 // Consts
-export interface IWidths {
+export interface Widths {
   header_width: string;
   body_width: string;
 }
-export interface IPaddings {
+export interface Paddings {
   tablist_padding: string;
 }
 
-declare module 'styled-components' {
-  export interface DefaultTheme {
-    name: Theme;
+// Theme
+declare module '@emotion/react' {
+  export interface Theme {
+    name: ThemeName;
     _consts: {
-      widths: IWidths;
-      paddings: IPaddings;
+      widths: Widths;
+      paddings: Paddings;
     };
     site: {
       background: string;

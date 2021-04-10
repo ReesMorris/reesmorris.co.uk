@@ -1,7 +1,7 @@
-import { DefaultTheme } from 'styled-components';
+import { Theme } from '.';
 import _consts from './_consts';
 
-const theme: DefaultTheme = {
+const theme: Theme = {
   _consts,
   name: 'dark',
   site: {

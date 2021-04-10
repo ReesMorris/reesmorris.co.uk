@@ -1,8 +1,7 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 interface TextProps {
-  as: React.ElementType;
-  design: string;
+  design: React.ElementType | string;
   bold?: boolean;
   dark?: boolean;
 }

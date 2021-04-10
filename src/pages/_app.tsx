@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppProps } from 'next/app';
-import ThemeProvider from '../contexts/theme';
 import useIsTabbing from '../components/hooks/use-is-tabbing';
+import ThemeProvider from '../contexts/theme';
 import TabsProvider from '../contexts/tabs';
 import '../libs/fontawesome';
 

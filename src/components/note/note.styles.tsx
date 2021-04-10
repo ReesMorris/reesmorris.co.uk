@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { NoteType } from './note';
 import UIIcon from '../icon';
 

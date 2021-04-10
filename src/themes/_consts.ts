@@ -1,11 +1,11 @@
-import { IPaddings, IWidths } from './styled';
+import { Paddings, Widths } from './themes';
 
-const widths: IWidths = {
+const widths: Widths = {
   header_width: '725',
   body_width: '625'
 };
 
-const paddings: IPaddings = {
+const paddings: Paddings = {
   tablist_padding: '2rem'
 };
 

@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const Footer = styled.footer`
   margin: 5rem 0 2.5rem 0;
@@ -12,7 +12,7 @@ const Links = styled.ul`
 const Link = styled.li`
   font-size: 1.8rem;
 
-  &:not(:first-child) {
+  &:not(:first-of-type) {
     margin-left: 0.5rem;
   }
 `;

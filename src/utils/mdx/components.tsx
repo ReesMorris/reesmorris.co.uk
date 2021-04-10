@@ -13,17 +13,17 @@ import TabPanel from '../../components/tabpanel';
 
 export default {
   // Markdown components
-  wrapper: (props: any) => <ThemeProvider {...props} />,
-  h1: (props: any) => <Heading as='h1' {...props} />,
-  h2: (props: any) => <Heading as='h2' {...props} />,
-  h3: (props: any) => <Heading as='h3' {...props} />,
-  h4: (props: any) => <Heading as='h4' {...props} />,
-  p: (props: any) => <Text as='p' {...props} />,
-  a: (props: any) => <LinkWrapper {...props} />,
-  ul: (props: any) => <List as='ul' {...props} />,
-  ol: (props: any) => <List as='ol' {...props} />,
-  li: (props: any) => <ListItem {...props} />,
-  blockquote: (props: any) => <Blockquote {...props} />,
+  wrapper: (props: never) => <ThemeProvider {...props} />,
+  h1: (props: never) => <Heading as='h1' {...props} />,
+  h2: (props: never) => <Heading as='h2' {...props} />,
+  h3: (props: never) => <Heading as='h3' {...props} />,
+  h4: (props: never) => <Heading as='h4' {...props} />,
+  p: (props: never) => <Text as='p' {...props} />,
+  a: (props: never) => <LinkWrapper {...props} />,
+  ul: (props: never) => <List as='ul' {...props} />,
+  ol: (props: never) => <List as='ol' {...props} />,
+  li: (props: never) => <ListItem {...props} />,
+  blockquote: (props: never) => <Blockquote {...props} />,
 
   // Custom components
   Note,

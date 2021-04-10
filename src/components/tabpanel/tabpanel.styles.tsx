@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { TabPanel as UITabPanel } from 'react-tabs';
 
 const TabPanel = styled(UITabPanel)`

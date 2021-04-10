@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { Tabs as UITabs, Tab as UITab, TabList as UITabList } from 'react-tabs';
 
 const Tabs = styled(UITabs)`

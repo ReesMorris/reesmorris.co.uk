@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const Blockquote = styled.blockquote`
   border-left: 0.5rem solid ${props => props.theme.blockquote.border};

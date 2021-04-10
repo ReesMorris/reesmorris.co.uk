@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import LinkWrapper from '../link-wrapper';
 
 const Header = styled.header`
@@ -18,7 +18,7 @@ const Nav = styled.nav``;
 
 const NavLink = styled(LinkWrapper)`
   padding: 1rem;
-  &:not(:first-child) {
+  &:not(:first-of-type) {
     margin-left: 2rem;
   }
 `;

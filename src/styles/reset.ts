@@ -1,4 +1,4 @@
-import { css } from 'styled-components';
+import { css } from '@emotion/react';
 
 export default css`
   *,
@@ -9,10 +9,6 @@ export default css`
 
   html {
     font-size: 62.5%;
-  }
-
-  body {
-    background: ${props => props.theme.site.background};
   }
 
   body,
