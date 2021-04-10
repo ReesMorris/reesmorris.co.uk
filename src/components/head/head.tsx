@@ -25,8 +25,6 @@ const Head = ({ title, description, canonical, article, emoji }: HeadProps) => {
     article
   };
 
-  console.log(meta.title, meta.description, meta.canonical, meta.article);
-
   return (
     <>
       <NextHead>
