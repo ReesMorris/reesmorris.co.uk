@@ -5,9 +5,10 @@ import { MdxRemote } from 'next-mdx-remote/types';
 import { getFile, getFilesInDirectory, IFile } from '../../utils/mdx';
 import components from '../../utils/mdx/components';
 import Page from '../../components/page';
-import SEO from '../../seo';
 import Wrapper from '../../components/wrapper';
 import Heading from '../../components/heading';
+import TabList from '../../components/tablist';
+import TabPanel from '../../components/tabpanel';
 
 interface BlogPostProps {
   post: IFile;
@@ -19,15 +20,15 @@ const BlogPost = ({ post }: BlogPostProps) => {
   });
 
   return (
-    <Page>
-      <SEO
-        title={post.metadata.title}
-        description={post.metadata.summary}
-        canonical={`https://reesmorris.co.uk/blog/${post.metadata.slug}`}
-        type='article'
-        publishedTime={post.metadata.date}
-        emoji='📝'
-      />
+    <Page
+      seo={{
+        title: post.metadata.title,
+        description: post.metadata.summary,
+        canonical: `https://reesmorris.co.uk/blog/${post.metadata.slug}`,
+        article: { datePublished: post.metadata.date },
+        emoji: '📝'
+      }}
+    >
       <Wrapper>
         <article>
           <Heading>{post.metadata.title}</Heading>

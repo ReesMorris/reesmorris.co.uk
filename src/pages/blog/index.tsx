@@ -9,7 +9,6 @@ import Page from '../../components/page';
 import Text from '../../components/text';
 import Wrapper from '../../components/wrapper';
 import { getFiles, IFile } from '../../utils/mdx';
-import SEO from '../../seo';
 
 interface BlogProps {
   posts: IFile[];
@@ -28,13 +27,15 @@ const Blog = ({ posts }: BlogProps) => {
     );
 
   return (
-    <Page>
-      <SEO
-        title='Blog'
-        description='My takes on technology, gaming, the future, and everything between.'
-        canonical='https://reesmorris.co.uk/blog'
-        emoji='📝'
-      />
+    <Page
+      seo={{
+        title: 'Blog',
+        description:
+          'My takes on technology, gaming, the future, and everything between.',
+        canonical: 'https://reesmorris.co.uk/blog',
+        emoji: '📝'
+      }}
+    >
       <Wrapper>
         <Container>
           <Container small>

@@ -4,15 +4,10 @@ import Heading from '../components/heading';
 import Page from '../components/page';
 import Text from '../components/text';
 import Wrapper from '../components/wrapper';
-import SEO from '../seo';
 
 const Index = () => {
   return (
-    <Page>
-      <SEO
-        description='Front-end web developer in London'
-        canonical='https://reesmorris.co.uk'
-      />
+    <Page seo={{ canonical: 'https://reesmorris.co.uk' }}>
       <Wrapper>
         <Container>
           <Heading>About Me</Heading>
