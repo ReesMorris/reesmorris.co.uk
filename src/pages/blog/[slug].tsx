@@ -6,7 +6,7 @@ import { getFile, getFilesInDirectory, IFile } from '../../utils/mdx';
 import components from '../../utils/mdx/components';
 import Page from '../../components/page';
 import Wrapper from '../../components/wrapper';
-import Heading from '../../components/heading';
+import Article from '../../components/article';
 
 interface BlogPostProps {
   post: IFile;
@@ -28,10 +28,7 @@ const BlogPost = ({ post }: BlogPostProps) => {
       }}
     >
       <Wrapper>
-        <article>
-          <Heading>{post.metadata.title}</Heading>
-          {content}
-        </article>
+        <Article metadata={post.metadata} content={content} />
       </Wrapper>
     </Page>
   );
