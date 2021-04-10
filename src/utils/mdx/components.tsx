@@ -9,6 +9,7 @@ import Blockquote from '../../components/blockquote';
 import Note from '../../components/note';
 import TabList from '../../components/tablist';
 import TabPanel from '../../components/tabpanel';
+import Pre from '../../components/pre';
 
 export default {
   // Markdown components
@@ -22,6 +23,7 @@ export default {
   ol: (props: never) => <List as='ol' {...props} />,
   li: (props: never) => <ListItem {...props} />,
   blockquote: (props: never) => <Blockquote {...props} />,
+  pre: (props: never) => <Pre {...props} />,
 
   // Custom components
   Note,

@@ -44,20 +44,6 @@ const code = css`
     font-size: 85%;
   }
 
-  // <Pre> component
-  pre {
-    overflow: auto;
-    position: relative;
-    padding: 1.6rem;
-    line-height: 1.45;
-    overflow: auto;
-    margin: 0 0 1.6rem 0;
-
-    > code {
-      font-size: 1.4rem;
-    }
-  }
-
   // <Code> component
   code {
     span {

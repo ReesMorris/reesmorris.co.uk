@@ -5,7 +5,7 @@ interface ImageProps {
   src: string;
   alt: string;
   'aria-label'?: string;
-  role?: 'image' | 'presentation';
+  role?: 'presentation';
   className?: string;
 }
 
@@ -13,7 +13,7 @@ const Image = ({
   src,
   alt,
   'aria-label': ariaLabel,
-  role = 'image',
+  role,
   className
 }: ImageProps) => {
   return (

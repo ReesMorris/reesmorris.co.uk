@@ -13,11 +13,7 @@ const Article = ({ metadata, content }: ArticleProps) => {
     <Styles.Article>
       <Styles.Title>{metadata.title}</Styles.Title>
       <Styles.Metadata>
-        <Styles.Avatar
-          src='../../images/avatar.jpg'
-          alt='Rees Morris'
-          role='presentation'
-        />
+        <Styles.Avatar src='../../images/avatar.jpg' alt='Rees Morris' />
         Rees Morris &middot; {formatDate(metadata.date)}
       </Styles.Metadata>
 

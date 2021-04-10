@@ -9,7 +9,7 @@ const Header = () => {
     <Styles.Header role='banner'>
       <Wrapper type='header'>
         <Styles.Content>
-          <Styles.Nav>
+          <Styles.Nav aria-label='Main navigation'>
             <Styles.NavLink href='/'>
               <Text as='span' dark>
                 Home
@@ -21,7 +21,7 @@ const Header = () => {
               </Text>
             </Styles.NavLink>
           </Styles.Nav>
-          <Styles.AsideNav>
+          <Styles.AsideNav aria-label='Additional navigation'>
             <ToggleThemeButton />
           </Styles.AsideNav>
         </Styles.Content>
