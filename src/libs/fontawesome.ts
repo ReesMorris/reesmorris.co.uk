@@ -5,8 +5,17 @@ import {
   faExclamationCircle,
   faMoon,
   faSearch,
+  faSparkles,
   faSun
 } from '@fortawesome/pro-light-svg-icons';
 
 config.autoAddCss = false;
-library.add(fab, faMoon, faSun, faEnvelope, faSearch, faExclamationCircle);
+library.add(
+  fab,
+  faMoon,
+  faSun,
+  faEnvelope,
+  faSearch,
+  faExclamationCircle,
+  faSparkles
+);

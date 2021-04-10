@@ -1,4 +1,5 @@
 import 'styled-components';
+import { Theme } from '.';
 
 // Consts
 export interface IWidths {
@@ -11,7 +12,7 @@ export interface IPaddings {
 
 declare module 'styled-components' {
   export interface DefaultTheme {
-    name: string;
+    name: Theme;
     _consts: {
       widths: IWidths;
       paddings: IPaddings;

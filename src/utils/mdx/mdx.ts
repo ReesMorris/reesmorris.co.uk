@@ -43,7 +43,7 @@ export const getFile = async (
   // Convert the `content` into an mdxSource
   const source = withSource
     ? await renderToString(content, {
-        components: components,
+        components,
         mdxOptions: {
           remarkPlugins: [require('remark-slug')],
           rehypePlugins: [mdxPrism]
