@@ -6,7 +6,7 @@ import Text from '../components/text';
 import Wrapper from '../components/wrapper';
 import SEO from '../seo';
 
-const Index: React.FC = () => {
+const Index = () => {
   return (
     <Page>
       <SEO
@@ -36,4 +36,5 @@ const Index: React.FC = () => {
     </Page>
   );
 };
+
 export default Index;

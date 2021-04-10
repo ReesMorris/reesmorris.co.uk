@@ -3,7 +3,7 @@ import Button from '../button';
 import LinkWrapper from '../link-wrapper';
 import Styles from './footer.styles';
 
-const Footer: React.FC = () => {
+const Footer = () => {
   return (
     <Styles.Footer>
       <Styles.Links>

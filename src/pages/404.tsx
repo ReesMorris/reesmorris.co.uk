@@ -4,7 +4,7 @@ import Page from '../components/page';
 import Text from '../components/text';
 import Wrapper from '../components/wrapper';
 
-const Index: React.FC = () => {
+const Index = () => {
   return (
     <Page>
       <Wrapper>

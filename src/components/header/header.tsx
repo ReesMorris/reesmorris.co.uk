@@ -4,7 +4,7 @@ import ToggleThemeButton from '../toggle-theme-button';
 import Wrapper from '../wrapper';
 import Styles from './header.styles';
 
-const Header: React.FC = () => {
+const Header = () => {
   return (
     <Styles.Header role='banner'>
       <Wrapper type='header'>

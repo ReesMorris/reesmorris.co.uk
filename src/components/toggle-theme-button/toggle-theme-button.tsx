@@ -3,7 +3,7 @@ import Button from '../button';
 import NoScript from '../noscript';
 import { useTheme } from '../../contexts/theme/theme';
 
-const ToggleThemeButton: React.FC = () => {
+const ToggleThemeButton = () => {
   const { theme, setTheme } = useTheme();
   return (
     <>
