@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
-import { Tabs as UITabs, Tab as UITab, TabList as UITabList } from 'react-tabs';
 import { consts, themeVar } from '../../themes';
 
-const Tabs = styled(UITabs)`
+const Tabs = styled.div`
   border: 0.1rem solid ${themeVar('color-content-border')};
   border-radius: 0.6rem;
 
@@ -11,16 +10,13 @@ const Tabs = styled(UITabs)`
   }
 `;
 
-const TabList = styled(UITabList)`
+const TabList = styled.ul`
   overflow-x: auto;
   white-space: nowrap;
   border-bottom: 0.1rem solid ${themeVar('color-content-border')};
 `;
 
-interface TabProps {
-  $active: boolean;
-}
-const Tab = styled(UITab)<TabProps>`
+const Tab = styled.li`
   display: inline-block;
   position: relative;
   padding: 2rem;
@@ -38,8 +34,7 @@ const Tab = styled(UITab)<TabProps>`
     }
   }
 
-  &:hover:after,
-  &:focus:after {
+  &:hover:after {
     display: block;
     background: ${themeVar('color-content-border-focus')};
   }
