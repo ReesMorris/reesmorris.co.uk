@@ -1,16 +1,26 @@
 import React from 'react';
 import Styles from './tabpanel.styles';
 
-interface TabPanelProps {
+export interface TabPanelProps {
+  _parentProps?: {
+    id: string;
+    hidden: boolean;
+    'aria-labelledby': string;
+  };
   children: React.ReactNode;
 }
 
-const TabPanel = ({ children, ...rest }: TabPanelProps) => {
-  return <Styles.TabPanel {...rest}>{children}</Styles.TabPanel>;
+const TabPanel = ({ _parentProps, children }: TabPanelProps) => {
+  return (
+    <Styles.TabPanel
+      role='tabpanel'
+      id={_parentProps?.id}
+      hidden={_parentProps?.hidden}
+      aria-labelledby={_parentProps?.['aria-labelledby']}
+    >
+      {children}
+    </Styles.TabPanel>
+  );
 };
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-TabPanel.tabsRole = 'TabPanel';
 
 export default TabPanel;

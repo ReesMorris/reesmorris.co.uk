@@ -1,12 +1,13 @@
-import { css } from 'styled-components';
+import { css } from '@emotion/react';
+import { themeVar } from '../themes';
 
-export default css`
+const global = css`
   html {
     font-size: 62.5%;
   }
 
   body {
-    background: ${props => props.theme.site.background};
+    background: ${themeVar('color-site-bg')};
     font-size: 1.6rem;
   }
 
@@ -21,7 +22,7 @@ export default css`
   b,
   strong,
   kbd {
-    color: ${props => props.theme.colors.secondary};
+    color: ${themeVar('color-secondary')};
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
       Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
       'Segoe UI Symbol';
@@ -29,12 +30,12 @@ export default css`
 
   a {
     display: inline-block;
-    color: ${props => props.theme.colors.link};
+    color: ${themeVar('color-link')};
     text-decoration: none;
 
     &:hover {
       text-decoration: underline;
-      text-decoration-color: ${props => props.theme.colors.secondary};
+      text-decoration-color: inherit;
     }
   }
 
@@ -73,3 +74,5 @@ export default css`
     width: 1px;
   }
 `;
+
+export default global;

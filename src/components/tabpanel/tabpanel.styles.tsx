@@ -1,10 +1,8 @@
-import styled from 'styled-components';
-import { TabPanel as UITabPanel } from 'react-tabs';
+import styled from '@emotion/styled';
+import { consts } from '../../themes';
 
-const TabPanel = styled(UITabPanel)`
-  &.active {
-    padding: ${props => props.theme._consts.paddings.tablist_padding};
-  }
+const TabPanel = styled.div`
+  padding: ${consts.tablist_padding}rem;
 `;
 
 export default { TabPanel };

@@ -1,4 +1,6 @@
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
+import { themeVar } from '../../themes';
+import { css } from '@emotion/react';
 import IconC from '../icon';
 
 const Icon = styled(IconC)`
@@ -14,18 +16,18 @@ const Button = styled.button<ButtonProps>`
   padding: 1rem 1.3rem;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
     rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
-  border: 1px solid ${props => props.theme.button.border};
-  background: ${props => props.theme.button.background};
+  border: 1px solid ${themeVar('color-button-border')};
+  background: ${themeVar('color-button-bg')};
   display: flex;
   vertical-align: middle;
   justify-content: center;
   align-items: center;
   transition: all 0.2s ease;
   border-radius: 0.3rem;
-  color: ${props => props.theme.colors.secondary};
+  color: ${themeVar('color-secondary')};
 
   &:hover {
-    background: ${props => props.theme.button.hover_background};
+    background: ${themeVar('color-button-bg-hover')};
   }
 
   /* Icon only button (circle) */

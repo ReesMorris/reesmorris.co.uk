@@ -1,9 +1,10 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { themeVar } from '../../themes';
 
 const ListItem = styled.li`
-  color: ${props => props.theme.colors.secondary};
+  color: ${themeVar('color-secondary')};
 
-  &:not(:first-child) {
+  &:not(:first-of-type) {
     margin-top: 0.8rem;
   }
 `;

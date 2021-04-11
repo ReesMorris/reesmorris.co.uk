@@ -4,12 +4,12 @@ import ToggleThemeButton from '../toggle-theme-button';
 import Wrapper from '../wrapper';
 import Styles from './header.styles';
 
-const Header: React.FC = () => {
+const Header = () => {
   return (
     <Styles.Header role='banner'>
       <Wrapper type='header'>
         <Styles.Content>
-          <Styles.Nav>
+          <Styles.Nav aria-label='Main navigation'>
             <Styles.NavLink href='/'>
               <Text as='span' dark>
                 Home
@@ -21,7 +21,7 @@ const Header: React.FC = () => {
               </Text>
             </Styles.NavLink>
           </Styles.Nav>
-          <Styles.AsideNav>
+          <Styles.AsideNav aria-label='Additional navigation'>
             <ToggleThemeButton />
           </Styles.AsideNav>
         </Styles.Content>

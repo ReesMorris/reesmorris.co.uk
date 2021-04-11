@@ -4,7 +4,7 @@ interface TabsProps {
   children: React.ReactNode;
 }
 interface StateProps {
-  lastChoice: string;
+  tab: string;
 }
 interface ContextProps extends StateProps {
   setTab: (name: string) => void;
@@ -12,17 +12,17 @@ interface ContextProps extends StateProps {
 
 // The context
 const TabsContext = createContext<ContextProps>({
-  lastChoice: '',
+  tab: '',
   setTab: () => null
 });
 
 // The component
 const TabsProvider = ({ children }: TabsProps) => {
   const [tabs, setTabs] = useState<StateProps>({
-    lastChoice: ''
+    tab: ''
   });
 
-  const setTab = (name: string) => setTabs({ ...tabs, lastChoice: name });
+  const setTab = (name: string) => setTabs({ ...tabs, tab: name });
 
   return (
     <TabsContext.Provider value={{ ...tabs, setTab }}>

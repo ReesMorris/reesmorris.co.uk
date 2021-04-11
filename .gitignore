@@ -34,3 +34,6 @@ yarn-error.log*
 
 # Drafts
 src/data/drafts
+
+# other
+ngrok

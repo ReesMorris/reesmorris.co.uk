@@ -1,19 +1,19 @@
 import React from 'react';
 import { AppProps } from 'next/app';
-import ThemeWrapper from '../components/theme-wrapper';
 import useIsTabbing from '../components/hooks/use-is-tabbing';
 import TabsProvider from '../contexts/tabs';
-import '../utils/font-awesome';
+import ThemeProvider from '../contexts/theme';
+import '../libs/fontawesome';
 
 const App = ({ Component, pageProps }: AppProps) => {
   useIsTabbing();
 
   return (
-    <ThemeWrapper>
+    <ThemeProvider>
       <TabsProvider>
         <Component {...pageProps} />
       </TabsProvider>
-    </ThemeWrapper>
+    </ThemeProvider>
   );
 };
 

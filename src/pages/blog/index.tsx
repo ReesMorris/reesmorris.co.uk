@@ -8,12 +8,10 @@ import NoScript from '../../components/noscript';
 import Page from '../../components/page';
 import Text from '../../components/text';
 import Wrapper from '../../components/wrapper';
-import { getFiles } from '../../lib/mdx';
-import { IDataItem } from '../../models/data-item';
-import SEO from '../../seo';
+import { getFiles, IFile } from '../../utils/mdx';
 
 interface BlogProps {
-  posts: IDataItem[];
+  posts: IFile[];
 }
 
 const Blog = ({ posts }: BlogProps) => {
@@ -21,22 +19,23 @@ const Blog = ({ posts }: BlogProps) => {
 
   const sorted = posts
     .filter(post =>
-      post.frontMatter.title.toLowerCase().includes(searchInput.toLowerCase())
+      post.metadata.title.toLowerCase().includes(searchInput.toLowerCase())
     )
     .sort(
       (a, b) =>
-        Number(new Date(b.frontMatter.date)) -
-        Number(new Date(a.frontMatter.date))
+        Number(new Date(b.metadata.date)) - Number(new Date(a.metadata.date))
     );
 
   return (
-    <Page>
-      <SEO
-        title='Blog'
-        description='My takes on technology, gaming, the future, and everything between.'
-        canonical='https://reesmorris.co.uk/blog'
-        emoji='📝'
-      />
+    <Page
+      seo={{
+        title: 'Blog',
+        description:
+          'My takes on technology, gaming, the future, and everything between.',
+        canonical: 'https://reesmorris.co.uk/blog',
+        emoji: '📝'
+      }}
+    >
       <Wrapper>
         <Container>
           <Container small>
@@ -61,10 +60,7 @@ const Blog = ({ posts }: BlogProps) => {
         <Container>
           <Heading as='h2'>All Posts</Heading>
           {sorted.map(post => (
-            <BlogCard
-              key={post.frontMatter.title}
-              frontMatter={post.frontMatter}
-            />
+            <BlogCard key={post.metadata.title} metadata={post.metadata} />
           ))}
         </Container>
       </Wrapper>

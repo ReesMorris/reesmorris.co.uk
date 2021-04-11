@@ -17,7 +17,7 @@ const Note = ({ type, icon, children }: NoteProps) => {
           <Styles.Icon {...icon} />
         </Styles.IconContainer>
       )}
-      {children}
+      <Styles.Content>{children}</Styles.Content>
     </Styles.Note>
   );
 };

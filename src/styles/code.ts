@@ -1,6 +1,7 @@
-import { css } from 'styled-components';
+import { css } from '@emotion/react';
+import { themeVar } from '../themes';
 
-export default css`
+const code = css`
   // <Kbd> component
   kbd {
     display: inline-block;
@@ -10,9 +11,9 @@ export default css`
     line-height: 1rem;
     vertical-align: middle;
     background-color: transparent;
-    border: 0.1rem solid ${props => props.theme.code.background_dark};
+    border: 0.1rem solid ${themeVar('color-code-bg-block')};
     border-radius: 0.6rem;
-    color: ${props => props.theme.colors.secondary};
+    color: ${themeVar('color-secondary')};
   }
 
   // Shared between <Code> and <Pre> components
@@ -24,14 +25,14 @@ export default css`
     word-break: normal;
     word-wrap: normal;
     margin: 0;
-    background: ${props => props.theme.code.background_dark};
+    background: ${themeVar('color-code-bg-block')};
     font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 1.6rem;
     line-height: 1.5rem;
     tab-size: 4;
     hyphens: none;
     border-radius: 0.6rem;
-    color: ${props => props.theme.colors.secondary};
+    color: ${themeVar('color-secondary')};
   }
 
   // Code without <Pre> parent
@@ -39,29 +40,15 @@ export default css`
     white-space: normal;
     border-radius: 0.2em;
     padding: 0.2rem 0.5rem;
-    background: ${props => props.theme.code.background_light};
+    background: ${themeVar('color-code-bg-inline')};
     font-size: 85%;
-  }
-
-  // <Pre> component
-  pre {
-    overflow: auto;
-    position: relative;
-    padding: 1.6rem;
-    line-height: 1.45;
-    overflow: auto;
-    margin: 0 0 1.6rem 0;
-
-    > code {
-      font-size: 1.4rem;
-    }
   }
 
   // <Code> component
   code {
     span {
       font-family: inherit;
-      color: ${props => props.theme.colors.secondary};
+      color: ${themeVar('color-secondary')};
     }
   }
 
@@ -70,41 +57,43 @@ export default css`
   /*  */
   .token.tag,
   .token.punctuation {
-    color: ${props => props.theme.code.colors.tag};
+    color: ${themeVar('color-code-tag')};
   }
   .token.attr-value,
   .token.string {
-    color: ${props => props.theme.code.colors.string};
+    color: ${themeVar('color-code-string')};
   }
   .token.keyword,
   .token.template-punctuation {
-    color: ${props => props.theme.code.colors.keyword};
+    color: ${themeVar('color-code-keyword')};
   }
   .token.selector {
-    color: ${props => props.theme.code.colors.selector};
+    color: ${themeVar('color-code-selector')};
   }
   .token.property,
   .token.property-access,
   .token.operator {
-    color: ${props => props.theme.code.colors.property};
+    color: ${themeVar('color-code-property')};
   }
   .token.number {
-    color: ${props => props.theme.code.colors.number};
+    color: ${themeVar('color-code-number')};
   }
   .token.comment {
-    color: ${props => props.theme.code.colors.comment};
+    color: ${themeVar('color-code-comment')};
   }
   .token.attr-name,
   .token.function {
-    color: ${props => props.theme.code.colors.function};
+    color: ${themeVar('color-code-function')};
   }
   .token.class-name,
   .token.tag,
   .token.key {
-    color: ${props => props.theme.code.colors.classname};
+    color: ${themeVar('color-code-classname')};
   }
   .token.variable,
   .token.boolean {
-    color: ${props => props.theme.code.colors.variable};
+    color: ${themeVar('color-code-variable')};
   }
 `;
+
+export default code;
