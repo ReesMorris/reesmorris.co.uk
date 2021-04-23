@@ -1,17 +1,12 @@
 import styled from '@emotion/styled';
 import { themeVar } from '../../themes';
+import { TextProps } from './text';
 
-interface TextProps {
-  design: React.ElementType | string;
-  bold?: boolean;
-  dark?: boolean;
-}
-
-const Text = styled.p<TextProps>`
+const Text = styled.p<Partial<TextProps>>`
   color: ${props =>
     (props.dark && themeVar('color-primary')) || themeVar('color-secondary')};
   font-weight: ${props => (props.bold ? '600' : '400')};
-  line-height: 3.2rem;
+  line-height: ${props => (props.thinHeight && '2.5rem') || '3.2rem'};
 
   &:not(:last-child) {
     margin-bottom: 2rem;

@@ -29,7 +29,7 @@ const global = css`
   }
 
   a {
-    display: inline-block;
+    display: inline;
     color: ${themeVar('color-link')};
     text-decoration: none;
 

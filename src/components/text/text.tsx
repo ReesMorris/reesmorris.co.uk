@@ -1,11 +1,12 @@
 import React from 'react';
 import Styles from './text.styles';
 
-interface TextProps {
+export interface TextProps {
   as?: React.ElementType;
-  design?: string;
+  design?: React.ElementType;
   bold?: boolean;
   dark?: boolean;
+  thinHeight?: boolean;
   className?: string;
   children: React.ReactNode;
 }
@@ -15,6 +16,7 @@ const Text = ({
   design,
   bold,
   dark,
+  thinHeight,
   className,
   children
 }: TextProps) => {
@@ -24,6 +26,7 @@ const Text = ({
       design={design || as}
       bold={bold}
       dark={dark}
+      thinHeight={thinHeight}
       className={className}
     >
       {children}

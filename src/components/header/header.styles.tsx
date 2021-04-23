@@ -3,7 +3,6 @@ import { themeVar } from '../../themes';
 import LinkWrapper from '../link-wrapper';
 
 const Header = styled.header`
-  /* position: sticky; */
   top: 0;
   z-index: 10;
   padding: 4rem 0;

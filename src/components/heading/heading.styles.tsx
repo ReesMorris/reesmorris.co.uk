@@ -13,7 +13,7 @@ const Heading = styled.h1<HeadingProps>`
     (props.design === 'h1' && '1.6rem') ||
     (props.design === 'h2' && '1.0rem') ||
     (props.design === 'h3' && '0.6rem') ||
-    '0rem'};
+    '0.3rem'};
   font-size: ${props =>
     (props.design === 'h1' && '3.2rem') ||
     (props.design === 'h2' && '2.4rem') ||
@@ -26,6 +26,10 @@ const Heading = styled.h1<HeadingProps>`
     (props.design === 'h3' && '2.5rem') ||
     (props.design === 'h3' && '2.0rem') ||
     '2.3rem'};
+
+  &:not(:first-child) {
+    margin-top: 4rem;
+  }
 `;
 
 export default { Heading };

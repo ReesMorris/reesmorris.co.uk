@@ -20,7 +20,7 @@ const BlogCard = ({ metadata }: BlogCardProps) => {
           </Heading>
         </Styles.Link>
       </Styles.Header>
-      <Text>{summary}</Text>
+      <Text thinHeight>{summary}</Text>
     </Styles.BlogCard>
   );
 };
