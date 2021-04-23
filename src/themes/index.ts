@@ -13,14 +13,14 @@ const themeVar = (property: keyof ThemeStyles) => `var(--${property})`;
 // This actually happens during build time, so this method doesn't even run on the site.
 const stylesheet = () => {
   return Object.values(themes)
-    .map(vals => {
+    .map((vals, index) => {
       const data = Object.entries(vals.styles)
         .map(([key, val]) => {
           return `--${key}: ${val}`;
         })
         .filter(val => !!val)
         .join(';');
-      return `[data-theme='${vals.name}']{${data}}`;
+      return `${index === 0 && ':root,'}[data-theme='${vals.name}']{${data}}`;
     })
     .join(';');
 };
