@@ -3,6 +3,7 @@ import { fab } from '@fortawesome/free-brands-svg-icons';
 import {
   faEnvelope,
   faExclamationCircle,
+  faGraduationCap,
   faMoon,
   faSearch,
   faSparkles,
@@ -17,5 +18,6 @@ library.add(
   faEnvelope,
   faSearch,
   faExclamationCircle,
-  faSparkles
+  faSparkles,
+  faGraduationCap
 );
