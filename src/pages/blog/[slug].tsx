@@ -1,7 +1,6 @@
 import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import hydrate from 'next-mdx-remote/hydrate';
-import { MdxRemote } from 'next-mdx-remote/types';
+import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
 import { getFile, getFilesInDirectory, IFile } from '../../utils/mdx';
 import components from '../../utils/mdx/components';
 import Page from '../../components/page';
@@ -13,10 +12,6 @@ interface BlogPostProps {
 }
 
 const BlogPost = ({ post }: BlogPostProps) => {
-  const content = hydrate(post.source as MdxRemote.Source, {
-    components
-  });
-
   return (
     <Page
       seo={{
@@ -28,7 +23,12 @@ const BlogPost = ({ post }: BlogPostProps) => {
       }}
     >
       <Wrapper>
-        <Article metadata={post.metadata} content={content} />
+        <Article metadata={post.metadata}>
+          <MDXRemote
+            {...(post.source as MDXRemoteSerializeResult)}
+            components={components}
+          />
+        </Article>
       </Wrapper>
     </Page>
   );
@@ -36,7 +36,6 @@ const BlogPost = ({ post }: BlogPostProps) => {
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths = await getFilesInDirectory('blog');
-
   return {
     paths: paths.map(path => ({ params: { slug: path.replace('.mdx', '') } })),
     fallback: false

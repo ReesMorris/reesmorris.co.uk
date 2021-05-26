@@ -5,10 +5,10 @@ import Styles from './article.styles';
 
 interface ArticleProps {
   metadata: IFileMetadata;
-  content: React.ReactNode;
+  children: React.ReactNode;
 }
 
-const Article = ({ metadata, content }: ArticleProps) => {
+const Article = ({ metadata, children }: ArticleProps) => {
   return (
     <Styles.Article>
       <Styles.Title>{metadata.title}</Styles.Title>
@@ -17,7 +17,7 @@ const Article = ({ metadata, content }: ArticleProps) => {
         Rees Morris &middot; {formatDate(metadata.date)}
       </Styles.Metadata>
 
-      <Styles.Section>{content}</Styles.Section>
+      <Styles.Section>{children}</Styles.Section>
     </Styles.Article>
   );
 };

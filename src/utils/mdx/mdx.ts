@@ -2,9 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import mdxPrism from 'mdx-prism';
-import { MdxRemote } from 'next-mdx-remote/types';
-import renderToString from 'next-mdx-remote/render-to-string';
-import components from './components';
+import { serialize } from 'next-mdx-remote/serialize';
+import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 
 const root = process.cwd();
 const dataPath = 'src/data';
@@ -18,7 +17,7 @@ export interface IFileMetadata {
 }
 export interface IFile {
   metadata: IFileMetadata;
-  source: MdxRemote.Source | null;
+  source: MDXRemoteSerializeResult | null;
 }
 
 // Returns file names in directory
@@ -42,8 +41,7 @@ export const getFile = async (
 
   // Convert the `content` into an mdxSource
   const source = withSource
-    ? await renderToString(content, {
-        components,
+    ? await serialize(content, {
         mdxOptions: {
           remarkPlugins: [require('remark-slug')],
           rehypePlugins: [mdxPrism]
