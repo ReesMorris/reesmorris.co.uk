@@ -29,16 +29,14 @@ const TabList = ({ tabs, children }: TabListProps) => {
   const updateChildren = () => {
     const updated = React.Children.map(children, (child, index) => {
       if (React.isValidElement(child)) {
-        const elementChild: React.ReactElement<TabPanelProps> = React.cloneElement(
-          child,
-          {
+        const elementChild: React.ReactElement<TabPanelProps> =
+          React.cloneElement(child, {
             _parentProps: {
               id: `tablist-${id}-panel-${index}`,
               hidden: activeIndex !== index,
               'aria-labelledby': `tablist-${id}-tab-${index}`
             }
-          } as TabPanelProps
-        );
+          } as TabPanelProps);
         return elementChild;
       }
     });
