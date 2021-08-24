@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import mdxPrism from 'mdx-prism';
+import remarkSlug from 'remark-slug';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemoteSerializeResult } from 'next-mdx-remote';
 
@@ -43,7 +44,7 @@ export const getFile = async (
   const source = withSource
     ? await serialize(content, {
         mdxOptions: {
-          remarkPlugins: [require('remark-slug')],
+          remarkPlugins: [remarkSlug],
           rehypePlugins: [mdxPrism]
         }
       })
