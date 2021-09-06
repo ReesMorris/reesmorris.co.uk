@@ -34,7 +34,7 @@ I'm going to assume that you already have a Next.js application running with sty
 
 One of the major caveats of implementing a proper CSP header with Next.js and styled-components is that **[automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization) must be disabled across the application**. This is because we will need to generate a [nonce](https://content-security-policy.com/nonce/) on the server to be read via the `ctx.res` property on a custom [document](https://nextjs.org/docs/advanced-features/custom-document) page, which is not possible for pages that are prerendered (see the [caveats](https://nextjs.org/docs/advanced-features/automatic-static-optimization#caveats) on static optimisation).
 
-If this is a deal breaker for your application (ie. if you are running a completely prerendered blog or are strongly against disabling static optimisation across the entire site), your only solution will be to use the `'unsafe-inline'` value in your SCP header:
+If this is a deal breaker for your application (ie. if you are running a completely prerendered blog or are strongly against disabling static optimisation across the entire site), your only solution will be to use the `'unsafe-inline'` value in your CSP header:
 
 ```typescript
 style-src 'unsafe-inline'
@@ -101,7 +101,7 @@ Taking a look at the console, there are various warnings all related to the CSP 
 >
 > Either the 'unsafe-inline' keyword, a hash ('sha256-8rBi2tfimEXn67OXb9Bu+mEGs0onxPhYkouodSo3CLc='), or a nonce ('nonce-...') is required to enable inline execution. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.
 
-Let's break down what this message is telling us. The first sentence is our browser's way of explaining that it is refusing to render the inline styling on one of our DOM elements because inline styling isn't specifically allowed by our SCP.
+Let's break down what this message is telling us. The first sentence is our browser's way of explaining that it is refusing to render the inline styling on one of our DOM elements because inline styling isn't specifically allowed by our CSP.
 
 The next sentence explains how we can resolve this, either by adding an `'unsafe-inline'` value to the CSP header, or by adding a `sha256` / `nonce` attribute to our DOM elements. In order for inline styles to be rendered, we _must_ implement one of these three strategies.
 
@@ -207,7 +207,7 @@ Now you'll notice that the JavaScript code is now working (hooray for progress!)
 
 > Refused to connect to '&lt;URL&gt;' because it violates the following Content Security Policy directive: "default-src 'none'". Note that 'connect-src' was not explicitly set, so 'default-src' is used as a fallback.
 
-We'll need to define a `connect-src` directive to allow those URLs to be fetched. Let's add it to our `scp` object in the `generateSCP()` function, since we'll also want this in production. As the error messages show all of the URLs being from the same origin, we can again use the `'self'` value:
+We'll need to define a `connect-src` directive to allow those URLs to be fetched. Let's add it to our `csp` object in the `generateCSP()` function, since we'll also want this in production. As the error messages show all of the URLs being from the same origin, we can again use the `'self'` value:
 
 ```typescript
 const csp: Partial<Record<CSP, string>> = {
@@ -223,7 +223,7 @@ Our JavaScript now looks to be working without any other warnings on the page! T
 
 In order for the browser to allow us to use inline scripts and styles _without_ using the `'unsafe-inline'` value, we need to convince the browser that the scripts and styles it sees are genuine and not maliciously injected by a third party. This is where the `nonce` attribute comes in.
 
-By definition, a nonce is a randomly generated token that should only be used once. The idea is that we'll generate the nonce on the server side and attach it to our SCP headers as an allowed value (something like `'nonce-xyz'`). We'll then pass it through to the frontend and attach it to all of our scripts and styles using the `nonce` attribute. Before executing any scripts/styles, the browser will then compare the attribute on the element with the value in the SCP header. If the two match, they are considered genuine and will be allowed to run. Simple!
+By definition, a nonce is a randomly generated token that should only be used once. The idea is that we'll generate the nonce on the server side and attach it to our CSP headers as an allowed value (something like `'nonce-xyz'`). We'll then pass it through to the frontend and attach it to all of our scripts and styles using the `nonce` attribute. Before executing any scripts/styles, the browser will then compare the attribute on the element with the value in the CSP header. If the two match, they are considered genuine and will be allowed to run. Simple!
 
 <Note type='info' icon={{ icon: 'exclamation-circle' }}>
 
@@ -243,7 +243,7 @@ const generateNonce = () => {
 };
 ```
 
-Next we'll want to return the nonce with our SCP header by updating our `generateCSP()` function to accept the nonce as an argument. We'll also take this opportunity to append the `style-src` and `script-src` directives to our `csp` object since we know we'll need both of those. Because we're overriding the `script-src` directive in development, we'll also want to attach the nonce to that as well.
+Next we'll want to return the nonce with our CSP header by updating our `generateCSP()` function to accept the nonce as an argument. We'll also take this opportunity to append the `style-src` and `script-src` directives to our `csp` object since we know we'll need both of those. Because we're overriding the `script-src` directive in development, we'll also want to attach the nonce to that as well.
 
 ```typescript
 // Return a Content Security Policy string
@@ -284,7 +284,7 @@ server.use((_req: Request, res: Response, next: NextFunction) => {
   // Generate the random token
   const nonce = generateNonce();
 
-  // Set the SCP header
+  // Set the CSP header
   res.setHeader('Content-Security-Policy', generateCSP(nonce));
 
   // Make the nonce available to Next.js
