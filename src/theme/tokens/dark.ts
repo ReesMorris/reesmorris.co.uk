@@ -1,5 +1,5 @@
 import { ThemeTokens } from '.';
-import { staticThemeVar } from '..';
+import { staticThemeVar } from '../utils';
 
 export const darkTokens: ThemeTokens = {
   'color-background': staticThemeVar('color-black'),

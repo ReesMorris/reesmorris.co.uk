@@ -1,11 +1,11 @@
-import { css } from '@linaria/core';
-import { themeVar } from '..';
+import { css } from '@emotion/react';
+import { themeVar, staticThemeVar } from '../utils';
 
 export const globalCSS = css`
-  :global() {
-    body {
-      background-color: ${themeVar('color-background')};
-      color: ${themeVar('color-text-primary')};
-    }
+  body {
+    background-color: ${themeVar('color-background')};
+    color: ${themeVar('color-text-primary')};
+    font-family: ${staticThemeVar('font-family')};
+    font-size: ${staticThemeVar('font-size-base')};
   }
 `;

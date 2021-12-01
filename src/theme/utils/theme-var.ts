@@ -1,4 +1,4 @@
-import { StaticThemeToken, ThemeToken } from '..';
+import { StaticThemeToken, ThemeToken } from '../tokens';
 
 export const themeVar = (token: ThemeToken) => `var(--${token})`;
 

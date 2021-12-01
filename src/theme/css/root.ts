@@ -1,20 +1,18 @@
-import { css } from '@linaria/core';
+import { css } from '@emotion/react';
+import { staticTokens, lightTokens, darkTokens } from '../tokens';
 import { buildStyleRule } from '../utils';
-import { darkTokens, lightTokens, staticTokens } from '..';
 
 export const rootCSS = css`
-  :global() {
-    :root {
-      ${buildStyleRule(staticTokens)}
-    }
+  :root {
+    ${buildStyleRule(staticTokens)}
+  }
 
-    :root,
-    :root[data-theme='light'] {
-      ${buildStyleRule(lightTokens)}
-    }
+  :root,
+  :root[data-theme='light'] {
+    ${buildStyleRule(lightTokens)}
+  }
 
-    :root[data-theme='dark'] {
-      ${buildStyleRule(darkTokens)}
-    }
+  :root[data-theme='dark'] {
+    ${buildStyleRule(darkTokens)}
   }
 `;
