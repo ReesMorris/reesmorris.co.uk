@@ -8,7 +8,8 @@ export const mapProps = (props: LayoutProps) => {
     const propName = k as keyof LayoutProps;
 
     if (propName in propMap) {
-      const value = propMap[propName];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const value: any = propMap[propName];
 
       if (value) css += value(v);
     }

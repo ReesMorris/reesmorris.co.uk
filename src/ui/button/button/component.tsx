@@ -1,4 +1,3 @@
-import React, { ReactText } from 'react';
 import styled from '@emotion/styled';
 import { ButtonSize, ButtonVariant } from '../types';
 import { BorderRadius, Transition } from '../../types';
