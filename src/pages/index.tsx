@@ -1,11 +1,7 @@
-import { Nav } from '~/components';
+import { Page } from '~/components';
 
 const Index = () => {
-  return (
-    <>
-      <Nav />
-    </>
-  );
+  return <Page>Index page</Page>;
 };
 
 export default Index;

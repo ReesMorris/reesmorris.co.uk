@@ -8,6 +8,7 @@ export const Nav = () => {
       display={Display.Flex}
       padding={{ y: 4 }}
       margin={{ x: 'auto' }}
+      breakpointMedium={{ width: '100%', padding: { x: 2 } }}
       width='725px'
     >
       <header role='banner'>

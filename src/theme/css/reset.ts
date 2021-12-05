@@ -13,10 +13,11 @@ export const resetCSS = css`
 
   * {
     margin: 0;
+    padding: 0;
   }
 
   html {
-    font-size: 62.5%;
+    font-size: 62.5%; /* Set the base font to 10px */
   }
 
   html,
@@ -58,5 +59,9 @@ export const resetCSS = css`
   #root,
   #__next {
     isolation: isolate;
+  }
+
+  ul {
+    list-style-type: none;
   }
 `;

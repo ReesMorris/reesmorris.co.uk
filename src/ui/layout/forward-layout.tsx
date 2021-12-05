@@ -1,7 +1,7 @@
 import { Children, cloneElement, isValidElement } from 'react';
 import { cx } from '@emotion/css';
 import styled from '@emotion/styled';
-import { LayoutProps } from '.';
+import { LayoutProps } from './types';
 import { mapProps } from './utils/map-props';
 
 export const ForwardLayout = styled((props: LayoutProps) => {

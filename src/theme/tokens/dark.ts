@@ -1,10 +1,10 @@
-import { ThemeTokens } from '.';
+import { ThemeTokens } from './types';
 import { staticThemeVar } from '../utils';
 
 export const darkTokens: ThemeTokens = {
   'color-background': staticThemeVar('color-gray-1'),
   'color-button-default-text': staticThemeVar('color-white'),
-  'color-button-default-background-hover': staticThemeVar('opacity-black-3'),
+  'color-button-default-background-hover': staticThemeVar('opacity-white-1'),
   'color-button-primary-text': staticThemeVar('color-white'),
   'color-button-primary-background': staticThemeVar('color-blue-3'),
   'color-button-primary-background-hover': staticThemeVar('color-blue-2'),

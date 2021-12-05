@@ -1,4 +1,4 @@
-import { ThemeTokens } from '.';
+import { ThemeTokens } from './types';
 import { staticThemeVar } from '../utils';
 
 export const lightTokens: ThemeTokens = {

@@ -1,4 +1,4 @@
-import { LayoutProps } from '..';
+import { LayoutProps } from '../types';
 import { propMap } from './prop-map';
 
 export const mapProps = (props: LayoutProps) => {

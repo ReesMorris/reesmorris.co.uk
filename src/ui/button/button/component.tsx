@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactText } from 'react';
 import styled from '@emotion/styled';
 import { ButtonSize, ButtonVariant } from '../types';
 import { BorderRadius, Transition } from '../../types';
@@ -14,7 +14,9 @@ interface ButtonStyleProps {
 
 export interface ButtonProps
   extends ButtonStyleProps,
-    React.ButtonHTMLAttributes<HTMLButtonElement> {}
+    React.ButtonHTMLAttributes<HTMLButtonElement> {
+  as?: React.ElementType;
+}
 
 const ScButton = styled.button<ButtonStyleProps>`
   display: inline-flex;
@@ -58,11 +60,12 @@ const ScButton = styled.button<ButtonStyleProps>`
 `;
 
 export const Button = (props: ButtonProps) => {
-  const { type, $variant, $size, $radius, children, ...rest } = props;
+  const { as, type, $variant, $size, $radius, children, ...rest } = props;
 
   return (
     <ScButton
-      type={type || 'button'}
+      as={as}
+      type={type || as ? undefined : 'button'}
       $size={$size || ButtonSize.Medium}
       $radius={$radius || BorderRadius.Small}
       data-variant={$variant || ButtonVariant.Text}

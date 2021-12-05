@@ -6,6 +6,6 @@ export const globalCSS = css`
     background-color: ${themeVar('color-background')};
     color: ${themeVar('color-text-primary')};
     font-family: ${staticThemeVar('font-family')};
-    font-size: ${staticThemeVar('font-size-base')};
+    font-size: ${staticThemeVar('base-font-size')};
   }
 `;

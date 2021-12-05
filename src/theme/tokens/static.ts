@@ -1,12 +1,17 @@
 import { hsl, hsla } from 'polished';
-import { StaticThemeTokens } from '.';
+import { StaticThemeTokens } from './types';
 
 export const staticTokens: StaticThemeTokens = {
+  'base-rem-size': '10px',
+  'base-font-size': '16px',
   'border-radius-none': '0px',
   'border-radius-small': '2px',
   'border-radius-medium': '4px',
   'border-radius-large': '6px',
   'border-radius-round': '99999px',
+  'breakpoint-small': '425px',
+  'breakpoint-medium': '768px',
+  'breakpoint-large': '1024px',
   'button-size-small': '2rem',
   'button-size-medium': '3rem',
   'button-size-large': '4rem',
@@ -32,7 +37,6 @@ export const staticTokens: StaticThemeTokens = {
   'color-white': hsl(360, 1, 1),
   'font-family':
     "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol'",
-  'font-size-base': '1.6rem',
   'opacity-black-1': hsla(0, 0, 0, 0.1),
   'opacity-black-2': hsla(0, 0, 0, 0.2),
   'opacity-black-3': hsla(0, 0, 0, 0.3),
@@ -42,6 +46,15 @@ export const staticTokens: StaticThemeTokens = {
   'opacity-black-7': hsla(0, 0, 0, 0.7),
   'opacity-black-8': hsla(0, 0, 0, 0.8),
   'opacity-black-9': hsla(0, 0, 0, 0.9),
+  'opacity-white-1': hsla(0, 1, 1, 0.1),
+  'opacity-white-2': hsla(0, 1, 1, 0.2),
+  'opacity-white-3': hsla(0, 1, 1, 0.3),
+  'opacity-white-4': hsla(0, 1, 1, 0.4),
+  'opacity-white-5': hsla(0, 1, 1, 0.5),
+  'opacity-white-6': hsla(0, 1, 1, 0.6),
+  'opacity-white-7': hsla(0, 1, 1, 0.7),
+  'opacity-white-8': hsla(0, 1, 1, 0.8),
+  'opacity-white-9': hsla(0, 1, 1, 0.9),
   'space-0': '0px',
   'space-05': '5px',
   'space-1': '10px',

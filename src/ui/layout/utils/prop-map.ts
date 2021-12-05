@@ -1,5 +1,6 @@
-import { LayoutProps } from '..';
+import { LayoutProps } from '../types';
 import { TokenValue } from '../../../theme';
+import { breakpoint } from './breakpoint';
 import { declaration } from './declaration';
 import { spacing, spacingMap } from './spacing';
 
@@ -14,5 +15,10 @@ export const propMap: PropMap = {
   padding: spacing('padding'),
   display: declaration('display'),
   width: declaration('width'),
-  gap: v => declaration('gap')(spacingMap[v])
+  gap: v => declaration('gap')(spacingMap[v]),
+  justifyContent: declaration('justify-content'),
+  flexWrap: declaration('flex-wrap'),
+  breakpointSmall: breakpoint('small'),
+  breakpointMedium: breakpoint('medium'),
+  breakpointLarge: breakpoint('large')
 };

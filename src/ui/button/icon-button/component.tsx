@@ -6,8 +6,8 @@ import { ButtonSize } from '../types';
 import { interpolateProp } from '../../utils';
 
 export interface IconButtonProps extends ButtonProps {
-  'aria-label': string;
   icon: IconProps;
+  'aria-label'?: string;
 }
 
 const ScIconButton = styled(Button)`

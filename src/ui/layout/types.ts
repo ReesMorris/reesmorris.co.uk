@@ -4,6 +4,11 @@ export interface LayoutProps {
   display?: Display;
   width?: string;
   gap?: SpaceValue;
+  justifyContent?: JustifyContent;
+  flexWrap?: FlexWrap;
+  breakpointSmall?: Breakpoint;
+  breakpointMedium?: Breakpoint;
+  breakpointLarge?: Breakpoint;
   className?: string;
   children?: React.ReactNode;
 }
@@ -35,4 +40,24 @@ export enum Display {
   Flex = 'flex',
   Inline = 'inline',
   None = 'none'
+}
+
+export type BreakpointSize = 'small' | 'medium' | 'large';
+export type Breakpoint = Omit<
+  LayoutProps,
+  'breakpointSmall' | 'breakpointMedium' | 'breakpointLarge'
+>;
+
+export enum JustifyContent {
+  FlexStart = 'flex-start',
+  FlexEnd = 'flex-end',
+  Center = 'center',
+  SpaceBetween = 'space-between',
+  SpaceAround = 'space-around'
+}
+
+export enum FlexWrap {
+  NoWrap = 'nowrap',
+  Wrap = 'wrap',
+  WrapReverse = 'wrap-reverse'
 }
