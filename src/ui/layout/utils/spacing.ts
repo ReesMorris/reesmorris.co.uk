@@ -1,7 +1,7 @@
 import { staticThemeVar } from '../../../theme';
 import { Margin, MarginValue, Padding, PaddingValue } from '../types';
 
-const spacingMap: Record<MarginValue | PaddingValue, string> = {
+export const spacingMap: Record<MarginValue | PaddingValue, string> = {
   auto: 'auto',
   0: staticThemeVar('space-0'),
   0.5: staticThemeVar('space-05'),
@@ -13,8 +13,7 @@ const spacingMap: Record<MarginValue | PaddingValue, string> = {
 };
 
 export const spacing =
-  (name: 'margin' | 'padding') => (value?: Margin | Padding) => {
-    if (!value) return undefined;
+  (name: 'margin' | 'padding') => (value: Margin | Padding) => {
     let css = '';
 
     if (value.top) css += `${name}-top: ${spacingMap[value.top]};`;

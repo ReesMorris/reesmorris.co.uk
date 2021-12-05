@@ -3,11 +3,14 @@ export interface LayoutProps {
   padding?: Padding;
   display?: Display;
   width?: string;
+  gap?: SpaceValue;
   className?: string;
   children?: React.ReactNode;
 }
 
-export type MarginValue = 0 | 0.5 | 1 | 2 | 3 | 4 | 5 | 'auto';
+export type SpaceValue = 0 | 0.5 | 1 | 2 | 3 | 4 | 5;
+
+export type MarginValue = SpaceValue | 'auto';
 export type Margin = {
   top?: MarginValue;
   right?: MarginValue;
@@ -17,7 +20,7 @@ export type Margin = {
   y?: MarginValue;
 };
 
-export type PaddingValue = 0 | 0.5 | 1 | 2 | 3 | 4 | 5;
+export type PaddingValue = SpaceValue;
 export type Padding = {
   top?: PaddingValue;
   right?: PaddingValue;
