@@ -1,3 +1,9 @@
+// Fixes the custom Head component breaking the automatic CSS
+import { config } from '@fortawesome/fontawesome-svg-core';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+config.autoAddCss = false;
+
+// Our icon imports
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faGithub,

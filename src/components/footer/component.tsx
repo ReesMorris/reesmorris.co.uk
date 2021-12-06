@@ -9,7 +9,7 @@ import {
 
 export const Footer = () => {
   return (
-    <ForwardLayout margin={{ top: 5, bottom: 3, x: 'auto' }}>
+    <ForwardLayout margin={{ top: 5, x: 'auto' }} padding={{ bottom: 2 }}>
       <footer>
         <ForwardLayout
           display={Display.Flex}

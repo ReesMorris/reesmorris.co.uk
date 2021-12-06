@@ -3,7 +3,7 @@ import { FontSize, ForwardLayout, Heading, Text } from '~/ui';
 
 const Index = () => {
   return (
-    <Page>
+    <Page seo={{ canonical: 'https://reesmorris.co.uk' }}>
       <ForwardLayout margin={{ bottom: 1 }}>
         <Heading size={FontSize.Size2}>About Me</Heading>
       </ForwardLayout>

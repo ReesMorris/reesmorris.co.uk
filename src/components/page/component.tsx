@@ -1,13 +1,16 @@
 import { Nav, Footer } from '~/components';
+import { SEO, SEOProps } from '../seo';
 import { Layout } from '~/ui';
 
 interface PageProps {
+  seo?: SEOProps;
   children?: React.ReactNode;
 }
 
 export const Page = (props: PageProps) => {
   return (
     <>
+      <SEO {...props.seo} />
       <Nav />
       <Layout
         width='625px'
