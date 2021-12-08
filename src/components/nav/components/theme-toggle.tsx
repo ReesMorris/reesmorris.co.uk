@@ -12,7 +12,7 @@ export const ThemeToggle = () => {
 
   return (
     <IconButton
-      $variant={ButtonVariant.Text}
+      variant={ButtonVariant.Text}
       icon={{ name: theme === 'light' ? 'sun' : 'moon' }}
       aria-label={`Toggle theme (current: ${theme})`}
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}

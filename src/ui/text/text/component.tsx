@@ -11,9 +11,9 @@ interface TextStyleProps {
 export interface TextProps
   extends React.HtmlHTMLAttributes<HTMLParagraphElement> {
   type?: TextType | HeadingType;
+  children?: React.ReactNode;
   size?: FontSize;
   weight?: FontWeight;
-  children?: React.ReactNode;
 }
 
 const ScText = styled.p<TextStyleProps>`

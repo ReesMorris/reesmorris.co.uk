@@ -12,8 +12,10 @@ interface ButtonStyleProps {
 }
 
 export interface ButtonProps
-  extends ButtonStyleProps,
-    React.ButtonHTMLAttributes<HTMLButtonElement> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  size?: UISize;
+  radius?: BorderRadius;
+  variant?: ButtonVariant;
   as?: React.ElementType;
 }
 
@@ -59,15 +61,15 @@ const ScButton = styled.button<ButtonStyleProps>`
 `;
 
 export const Button = (props: ButtonProps) => {
-  const { as, type, $variant, $size, $radius, children, ...rest } = props;
+  const { as, type, variant, size, radius, children, ...rest } = props;
 
   return (
     <ScButton
       as={as}
       type={type || as ? undefined : 'button'}
-      $size={$size || UISize.Medium}
-      $radius={$radius || BorderRadius.Small}
-      data-variant={$variant || ButtonVariant.Text}
+      $size={size || UISize.Medium}
+      $radius={radius || BorderRadius.Small}
+      data-variant={variant || ButtonVariant.Text}
       {...rest}
     >
       {children}

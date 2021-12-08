@@ -1,11 +1,4 @@
-import {
-  Display,
-  ForwardLayout,
-  JustifyContent,
-  Link,
-  IconButton,
-  FlexWrap
-} from '~/ui';
+import { Display, ForwardLayout, JustifyContent, FlexWrap } from '~/ui';
 import { FooterItem } from './components';
 
 export const Footer = () => {

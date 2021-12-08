@@ -33,14 +33,6 @@ export const getFile = async (
     body = value.toString();
   }
 
-  console.log({
-    body,
-    metadata: {
-      ...data,
-      slug: slug.replace('.mdx', '')
-    } as MDXMetadata
-  });
-
   return {
     body,
     metadata: {

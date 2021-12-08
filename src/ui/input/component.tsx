@@ -57,8 +57,8 @@ const ScInput = styled.input<InputStyleProps>`
   })};
 
   padding: 12px;
-  padding-left: ${props =>
-    props.$hasIconLeft ? toRem(staticTokens['space-4']) : undefined};
+  padding-left: ${({ $hasIconLeft }) =>
+    $hasIconLeft ? toRem(staticTokens['space-4']) : undefined};
 
   ${placeholder`
     color: ${themeVar('color-input-placeholder')};
