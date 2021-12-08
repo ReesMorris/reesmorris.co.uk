@@ -1,5 +1,5 @@
 import { LayoutProps } from '../types';
-import { propMap } from './prop-map';
+import { propMap } from '.';
 
 export const mapProps = (props: LayoutProps) => {
   let css = '';

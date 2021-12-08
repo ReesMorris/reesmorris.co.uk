@@ -32,9 +32,7 @@ const ScLink = styled.a<LinkStyleProps>`
       (colorHover === LinkColor.Inherit && 'inherit') ||
       themeVar('color-text-link-hover')};
     text-decoration: ${({ underline }) =>
-      (underline === LinkUnderline.Always && 'underline') ||
-      (underline === LinkUnderline.Hover && 'underline') ||
-      'none'};
+      (underline === LinkUnderline.None && 'none') || 'underline'};
   }
 `;
 

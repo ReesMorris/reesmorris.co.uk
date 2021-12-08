@@ -12,9 +12,6 @@ export const staticTokens: StaticThemeTokens = {
   'breakpoint-small': '425px',
   'breakpoint-medium': '768px',
   'breakpoint-large': '1024px',
-  'button-size-small': '2rem',
-  'button-size-medium': '3rem',
-  'button-size-large': '4rem',
   'color-black': hsl(0, 0, 0),
   'color-blue-1': hsl(210, 0.8, 0.1),
   'color-blue-2': hsl(210, 0.8, 0.2),
@@ -67,12 +64,16 @@ export const staticTokens: StaticThemeTokens = {
   'font-size-3': '2.4rem',
   'font-size-4': '2rem',
   'font-size-5': '1.6rem',
-  'font-size-6': '1.2rem',
+  'font-size-6': '1.3rem',
+  'font-size-7': '1.1rem',
   'font-weight-light': 300,
   'font-weight-normal': 400,
   'font-weight-semibold': 600,
   'font-weight-bold': 700,
   'transition-short': '100ms',
   'transition-medium': '250ms',
-  'transition-long': '500ms'
+  'transition-long': '500ms',
+  'ui-nowrap-size-small': '3rem',
+  'ui-nowrap-size-medium': '4rem',
+  'ui-nowrap-size-large': '5rem'
 };

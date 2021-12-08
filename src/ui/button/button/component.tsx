@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
-import { ButtonSize, ButtonVariant } from '../types';
-import { BorderRadius, Transition } from '../../types';
+import { ButtonVariant } from '../types';
+import { UISize, BorderRadius, Transition } from '../../types';
 import { staticThemeVar, themeVar } from '~/theme';
 import { interpolateProp } from '../../utils';
 import { transition } from '../../utils/transition';
 
 interface ButtonStyleProps {
-  $size?: ButtonSize;
+  $size?: UISize;
   $radius?: BorderRadius;
   $variant?: ButtonVariant;
 }
@@ -29,9 +29,9 @@ const ScButton = styled.button<ButtonStyleProps>`
   transition: background-color ${transition(Transition.Medium)} ease-in;
 
   height: ${interpolateProp('$size', {
-    [ButtonSize.Small]: staticThemeVar('button-size-small'),
-    [ButtonSize.Medium]: staticThemeVar('button-size-medium'),
-    [ButtonSize.Large]: staticThemeVar('button-size-large')
+    [UISize.Small]: staticThemeVar('ui-nowrap-size-small'),
+    [UISize.Medium]: staticThemeVar('ui-nowrap-size-medium'),
+    [UISize.Large]: staticThemeVar('ui-nowrap-size-large')
   })};
 
   border-radius: ${interpolateProp('$radius', {
@@ -65,7 +65,7 @@ export const Button = (props: ButtonProps) => {
     <ScButton
       as={as}
       type={type || as ? undefined : 'button'}
-      $size={$size || ButtonSize.Medium}
+      $size={$size || UISize.Medium}
       $radius={$radius || BorderRadius.Small}
       data-variant={$variant || ButtonVariant.Text}
       {...rest}

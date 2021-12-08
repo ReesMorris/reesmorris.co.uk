@@ -10,6 +10,19 @@ import {
   faLinkedin,
   faTwitter
 } from '@fortawesome/free-brands-svg-icons';
-import { faSun, faMoon, faEnvelope } from '@fortawesome/pro-light-svg-icons';
+import {
+  faSun,
+  faMoon,
+  faEnvelope,
+  faSearch
+} from '@fortawesome/pro-light-svg-icons';
 
-library.add(faSun, faMoon, faTwitter, faGithub, faLinkedin, faEnvelope);
+library.add(
+  faSun,
+  faMoon,
+  faTwitter,
+  faGithub,
+  faLinkedin,
+  faEnvelope,
+  faSearch
+);

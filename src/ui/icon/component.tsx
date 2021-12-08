@@ -1,8 +1,5 @@
 import { IconName, IconPrefix } from '@fortawesome/fontawesome-common-types';
-import {
-  FontAwesomeIcon,
-  FontAwesomeIconProps
-} from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export interface IconProps {
   name: IconName;

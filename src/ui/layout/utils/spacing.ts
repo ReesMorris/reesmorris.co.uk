@@ -1,4 +1,4 @@
-import { staticThemeVar } from '../../../theme';
+import { staticThemeVar } from '~/theme';
 import { Margin, MarginValue, Padding, PaddingValue } from '../types';
 
 export const spacingMap: Record<MarginValue | PaddingValue, string> = {

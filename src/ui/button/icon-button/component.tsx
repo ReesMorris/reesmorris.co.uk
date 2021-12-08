@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
 import { Button, ButtonProps } from '../button';
-import { BorderRadius, Icon, IconProps } from '../..';
+import { BorderRadius, UISize } from '../../types';
+import { Icon, IconProps } from '../..';
 import { staticThemeVar } from '~/theme';
-import { ButtonSize } from '../types';
 import { interpolateProp } from '../../utils';
 
 export interface IconButtonProps extends ButtonProps {
@@ -12,9 +12,9 @@ export interface IconButtonProps extends ButtonProps {
 
 const ScIconButton = styled(Button)`
   width: ${interpolateProp('$size', {
-    [ButtonSize.Small]: staticThemeVar('button-size-small'),
-    [ButtonSize.Medium]: staticThemeVar('button-size-medium'),
-    [ButtonSize.Large]: staticThemeVar('button-size-large')
+    [UISize.Small]: staticThemeVar('ui-nowrap-size-small'),
+    [UISize.Medium]: staticThemeVar('ui-nowrap-size-medium'),
+    [UISize.Large]: staticThemeVar('ui-nowrap-size-large')
   })};
 `;
 
@@ -25,7 +25,7 @@ export const IconButton = (props: IconButtonProps) => {
     <ScIconButton
       {...rest}
       aria-label={ariaLabel}
-      $size={$size || ButtonSize.Large}
+      $size={$size || UISize.Medium}
       $radius={BorderRadius.Round}
     >
       <Icon {...icon} />

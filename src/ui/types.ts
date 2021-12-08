@@ -1,3 +1,9 @@
+export enum UISize {
+  Small = 'small',
+  Medium = 'medium',
+  Large = 'large'
+}
+
 export enum BorderRadius {
   None = 'none',
   Small = 'small',

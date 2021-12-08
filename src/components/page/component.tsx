@@ -1,5 +1,4 @@
-import { Nav, Footer } from '~/components';
-import { SEO, SEOProps } from '../seo';
+import { Nav, Footer, SEO, SEOProps } from '~/components';
 import { Layout } from '~/ui';
 
 interface PageProps {

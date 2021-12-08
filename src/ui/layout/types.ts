@@ -6,6 +6,7 @@ export interface LayoutProps {
   gap?: SpaceValue;
   justifyContent?: JustifyContent;
   flexWrap?: FlexWrap;
+  color?: Color;
   breakpointSmall?: Breakpoint;
   breakpointMedium?: Breakpoint;
   breakpointLarge?: Breakpoint;
@@ -60,4 +61,10 @@ export enum FlexWrap {
   NoWrap = 'nowrap',
   Wrap = 'wrap',
   WrapReverse = 'wrap-reverse'
+}
+
+export enum Color {
+  Inherit = 'inherit',
+  Base = 'base',
+  Lighter = 'lighter'
 }

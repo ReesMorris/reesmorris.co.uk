@@ -5,9 +5,15 @@ export type ThemeToken =
   | 'color-button-primary-text'
   | 'color-button-primary-background'
   | 'color-button-primary-background-hover'
+  | 'color-input-background'
+  | 'color-input-border'
+  | 'color-input-border-focus'
+  | 'color-input-placeholder'
+  | 'color-input-text'
+  | 'color-text-lighter'
   | 'color-text-link'
   | 'color-text-link-hover'
-  | 'color-text-primary';
+  | 'color-text-base';
 
 export type StaticThemeToken =
   | 'base-rem-size'
@@ -20,9 +26,6 @@ export type StaticThemeToken =
   | 'breakpoint-small'
   | 'breakpoint-medium'
   | 'breakpoint-large'
-  | 'button-size-small'
-  | 'button-size-medium'
-  | 'button-size-large'
   | 'color-black'
   | 'color-blue-1'
   | 'color-blue-2'
@@ -75,13 +78,17 @@ export type StaticThemeToken =
   | 'font-size-4'
   | 'font-size-5'
   | 'font-size-6'
+  | 'font-size-7'
   | 'font-weight-light'
   | 'font-weight-normal'
   | 'font-weight-semibold'
   | 'font-weight-bold'
   | 'transition-short'
   | 'transition-medium'
-  | 'transition-long';
+  | 'transition-long'
+  | 'ui-nowrap-size-small'
+  | 'ui-nowrap-size-medium'
+  | 'ui-nowrap-size-large';
 
 export type TokenValue = string | number;
 export type ThemeTokens = Record<ThemeToken, TokenValue>;

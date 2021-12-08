@@ -1,6 +1,6 @@
 import { Breakpoint, BreakpointSize } from '../types';
 import { staticTokens } from '~/theme';
-import { mapProps } from './map-props';
+import { mapProps } from '.';
 import { toRem } from '../../utils/to-rem';
 
 export const breakpoint = (size: BreakpointSize) => (props: Breakpoint) =>

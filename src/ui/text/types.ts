@@ -18,7 +18,8 @@ export enum FontSize {
   Size3 = '3',
   Size4 = '4',
   Size5 = '5',
-  Size6 = '6'
+  Size6 = '6',
+  Size7 = '7'
 }
 
 export enum FontWeight {

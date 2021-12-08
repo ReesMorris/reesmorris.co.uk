@@ -3,6 +3,7 @@ import { TokenValue } from '../../../theme';
 import { breakpoint } from './breakpoint';
 import { declaration } from './declaration';
 import { spacing, spacingMap } from './spacing';
+import { color } from './color';
 
 type PropMap = {
   [P in keyof LayoutProps]: (
@@ -18,6 +19,7 @@ export const propMap: PropMap = {
   gap: v => declaration('gap')(spacingMap[v]),
   justifyContent: declaration('justify-content'),
   flexWrap: declaration('flex-wrap'),
+  color: color,
   breakpointSmall: breakpoint('small'),
   breakpointMedium: breakpoint('medium'),
   breakpointLarge: breakpoint('large')

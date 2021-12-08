@@ -6,6 +6,7 @@ import {
   IconButton,
   FlexWrap
 } from '~/ui';
+import { FooterItem } from './components';
 
 export const Footer = () => {
   return (
@@ -19,33 +20,32 @@ export const Footer = () => {
         >
           <ul aria-label='Social links'>
             <li>
-              <Link href='https://twitter.com/reesmorris' aria-label='Twitter'>
-                <IconButton
-                  as='div'
-                  icon={{ name: 'twitter', weight: 'fab' }}
-                />
-              </Link>
+              <FooterItem
+                href='https://twitter.com/reesmorris'
+                label='Twitter'
+                icon={{ name: 'twitter', weight: 'fab' }}
+              />
             </li>
             <li>
-              <Link href='https://github.com/reesmorris' aria-label='GitHub'>
-                <IconButton as='div' icon={{ name: 'github', weight: 'fab' }} />
-              </Link>
+              <FooterItem
+                href='https://github.com/reesmorris'
+                label='GitHub'
+                icon={{ name: 'github', weight: 'fab' }}
+              />
             </li>
             <li>
-              <Link
+              <FooterItem
                 href='https://linkedin.com/reesmorris'
-                aria-label='LinkedIn'
-              >
-                <IconButton
-                  as='div'
-                  icon={{ name: 'linkedin', weight: 'fab' }}
-                />
-              </Link>
+                label='LinkedIn'
+                icon={{ name: 'linkedin', weight: 'fab' }}
+              />
             </li>
             <li>
-              <Link href='mailto:contact@reesmorris.co.uk' aria-label='Email'>
-                <IconButton as='div' icon={{ name: 'envelope' }} />
-              </Link>
+              <FooterItem
+                href='mailto:contact@reesmorris.co.uk'
+                label='Email'
+                icon={{ name: 'envelope' }}
+              />
             </li>
           </ul>
         </ForwardLayout>
