@@ -7,7 +7,8 @@ import {
   Text,
   TextType,
   ForwardLayout,
-  Color
+  Color,
+  LineHeight
 } from '~/ui';
 import { MDXMetadata } from '~/utils/mdx';
 import { formatDate } from '~/utils/date';
@@ -27,9 +28,15 @@ export const BlogPostPreview = (props: BlogPostPreviewProps) => {
           color={LinkColor.Inherit}
           colorHover={LinkColor.Inherit}
         >
-          <Heading type={HeadingType.H3} size={FontSize.Size5}>
-            {title}
-          </Heading>
+          <ForwardLayout margin={{ bottom: 0.5 }}>
+            <Heading
+              type={HeadingType.H3}
+              size={FontSize.Size5}
+              lineHeight={LineHeight.Small}
+            >
+              {title}
+            </Heading>
+          </ForwardLayout>
         </Link>
       </header>
       <Text size={FontSize.Size6}>

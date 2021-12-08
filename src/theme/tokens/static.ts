@@ -3,7 +3,6 @@ import { StaticThemeTokens } from './types';
 
 export const staticTokens: StaticThemeTokens = {
   'base-rem-size': '10px',
-  'base-font-size': '1.6rem',
   'border-radius-none': '0px',
   'border-radius-small': '2px',
   'border-radius-medium': '4px',
@@ -34,6 +33,10 @@ export const staticTokens: StaticThemeTokens = {
   'color-white': hsl(360, 1, 1),
   'font-family':
     "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol'",
+  'line-height-base': '1.6',
+  'line-height-small': '1.3',
+  'line-height-medium': '1.5',
+  'line-height-large': '1.7',
   'opacity-black-1': hsla(0, 0, 0, 0.1),
   'opacity-black-2': hsla(0, 0, 0, 0.2),
   'opacity-black-3': hsla(0, 0, 0, 0.3),
@@ -66,6 +69,7 @@ export const staticTokens: StaticThemeTokens = {
   'font-size-5': '1.6rem',
   'font-size-6': '1.3rem',
   'font-size-7': '1.1rem',
+  'font-size-base': '1.6rem',
   'font-weight-light': 300,
   'font-weight-normal': 400,
   'font-weight-semibold': 600,

@@ -28,3 +28,9 @@ export enum FontWeight {
   SemiBold = 'semibold',
   Bold = 'bold'
 }
+
+export enum LineHeight {
+  Small = 'small',
+  Medium = 'medium',
+  Large = 'large'
+}

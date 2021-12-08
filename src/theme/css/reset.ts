@@ -26,7 +26,6 @@ export const resetCSS = css`
   }
 
   body {
-    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
   }
 

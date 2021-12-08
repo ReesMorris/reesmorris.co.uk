@@ -1,0 +1,283 @@
+---
+title: 'Converting Google Firestore data to CSV files'
+date: '2021-04-03'
+summary: 'A quick step-by-step guide on converting Cloud Firestore data into a CSV file.'
+---
+
+## Introduction
+
+Almost five months ago, I began working on a [small project](https://reesmorris.co.uk/blog/making-code-listen-to-the-radio) that consistently stores current song information from three radio stations into a Firestore database. The next step in analysing this data is to create a method to pull the entire collection and save it as a CSV.
+
+In order to do so, we'll need to write a small script that will pull the data from the database and write the data to a CSV file. We'll be creating the script so that it can be executed as a [Cloud Function](https://cloud.google.com/functions), but won't be deploying it in this post.
+
+## Design Document
+
+The goal is to create a simple script that will pull _x_ amount of entries from the database, parse the results, and write them to a CSV file. The CSV will also be uploaded to a [Cloud Storage](https://cloud.google.com/storage) bucket, meaning the script can be executed as a [Cloud Function](https://cloud.google.com/functions) and executed at a predefined hourly/daily/monthly interval.
+
+Because the database entries are being pulled from a live database that is constantly being written to, we'll also need a way of "bookmarking" the last object fetched from the database, so our CSVs don't contain duplicate data.
+
+## 1. Creating a Service Account
+
+Most official Google Cloud npm libraries support [Application Default Credentials](https://cloud.google.com/docs/authentication/production), a very fancy way of saying credential-less authentication. This means that for any code executed on certain Google Cloud services (including Cloud Functions!) we won't need to provide a password, key, or file for the npm library to be authenticated.
+
+Instead, authentication happens from a Service Account: a type of account that exists within a Google Cloud project but has no human-based interaction: it doesn't have a password and you can't sign in to it. Instead, it acts as a way to assign permissions to your cloud services (such as Cloud Functions) or actual humans who need to execute code locally on their machine.
+
+Because we'll need to be able to read and write to our Firestore database, as well as create new objects in Cloud Storage, we will need to have the correct permissions to do so. On our local machine, we'll also need to prove that we have these permissions in the form of a (usually) JSON credentials key.
+
+Set up a new Service Account the [Service Account](https://console.cloud.google.com/iam-admin/serviceaccounts) page, naming it anything close to its intended purpose. For example, "firestore-to-csv".
+
+The next step is to grant the service account permissions to perform certain tasks; by default it won't have permission to do anything. In our design brief, we specified that we need the account to be able to:
+
+- Read data from Firestore
+- Write data to Firestore
+- Upload a file to Cloud Storage
+
+Whilst we could just grant our service account the "admin" role in everything, that opens up unnecessary security risks for our application. Instead, we'll want to only give the service account access to what it _needs_, and nothing more.
+
+For Firestore, searching "Firestore IAM Roles" returns [this documentation](https://cloud.google.com/datastore/docs/access/iam#iam_roles). Looking at the descriptions for each role, the "datastore.user" role definitely seems the most appropriate for our case, so back in the service account we can add the role "Cloud Datastore User".
+
+For Cloud Storage, we can do the same: searching "Cloud Storage IAM Roles" returns [this documentation](https://cloud.google.com/storage/docs/access-control/iam-roles). Looking at the descriptions again, the "Storage Object Creator" role seems perfect for what we need; we only need to _create_ (upload) files. We can add the same permission to the service account and create it. If you already created the service account without this permission, you can update its permissions from the [IAM Tab](https://console.cloud.google.com/iam-admin/iam).
+
+When deploying our finished code to a Cloud Function, we can simply specify the service account we just created as its "Runtime service account" - meaning it will automatically have access to read/write Firestore data and upload files without the need to authenticate. This level of control also means if ou code is somehow compromised, the damage is limited.
+
+For local development, however, we do need a way of letting Google know which service account to execute actions from. From the [Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) tab, click on the "Actions" next to the new service account and click on "Manage keys". Click on the "Add key" drop down, and then "Create new key." Keep the key as a JSON key, and then click on "Create". This will download a file to your computer. Make sure this file is kept private (including keeping it in _.gitignore_!).
+
+## Setup
+
+Initialise a new npm project:
+
+```
+npm init -y
+```
+
+and install the three dependencies:
+
+```
+npm install firebase-admin csv-writer @google-cloud/storage
+```
+
+Create an `index.js` file, and also upload the service account JSON to the root directory. If you are using source control, make sure the service account credentials are _not_ committed.
+
+## Code
+
+### Basic Setup
+
+As some of the functions we'll be calling return promises, we'll need to wrap our `index.js` file in an asynchronous function that we call immediately:
+
+```javascript
+const run = async () => {};
+run();
+```
+
+All of the code below is part of the `run` method, and each code block (unless stated) will simply go beneath any previous code blocks.
+
+### Initialising Firebase
+
+At the top of the file, let's import the module:
+
+```javascript
+const admin = require('firebase-admin');
+```
+
+Inside the `run` function, add:
+
+```javascript
+// Initialise the application
+process.env.NODE_ENV === 'production'
+  ? admin.initializeApp()
+  : admin.initializeApp({
+      credential: admin.credential.cert(require('./service-account.json'))
+    });
+
+const db = admin.firestore();
+```
+
+The first step is to [initialise Firebase](https://firebase.google.com/docs/firestore/quickstart#initialize); we're going to need to connect to the database before we can do anything else.
+
+As mentioned above, most Google libraries use a credential-less authentication system called ADC. This means that we only need to provide credentials for our service account if we aren't running our code on a Google machine.
+
+By checking the environment, we're able to create a conditional that will initialise an instance of Firestore with[out] the JSON credentials file, depending on whether we're in production or not. This means locally we can test the application so long as the JSON file is present, and we won't need it for when we deploy to Cloud Functions.
+
+### Fetching the Timestamp
+
+In Firestore, I have one collection called `radio` which contains entries related to the station, artist, song, and timestamp. In order to prevent duplicates in the CSV file, we'll need to "bookmark" the last record we fetched so we can sort from there the next time.
+
+Because the database is constantly changing, I'll need to store the timestamp of the last record this script fetches, rather than the record ID itself (since there's no incremental logic for that).
+
+I created a new database collection called `radio_data`, which has one document only: a document called `data` (it's important to give it a name!) and a field called `last_fetched_for_csv`. I set it to be a value of type `timestamp` and a default value of `01/01/1970, 00:00` - the start of UNIX time.
+
+To keep the code as flexible as possible, I created a `config` object at the top so that the code can be tweaked on the fly without needing to re-deploy anything. We'll be adding a few more variables to this file later on:
+
+```javascript
+// Script configuration
+const config = {
+  COLLECTION: process.env.COLLECTION || 'radio',
+  COLLECTION_DATA: process.env.COLLECTION_DATA || 'radio_data',
+  COLLECTION_DATA_DOC: process.env.COLLECTION_DATA_DOC || 'data',
+  LIMIT: process.env.LIMIT || 5
+};
+```
+
+- `COLLECTION` is the name of the collection our actual data is in (that we want to convert to CSV)
+- `COLLECTION_DATA` is the name of our collection that contains the metadata for our script
+- `COLLECTION_DATA_DOC` is the name of the document inside our `COLLECTION_DATA` collection with the timestamp of our last successful attempt
+- `LIMIT` is the numer of documents to fetch from the `COLLECTION` collection in a single execution
+
+Back in the `run` function, beneath the code we've already written, we can now add code to get the last timestamp:
+
+```javascript
+// Get the last timestamp
+const timestampDoc = await db
+  .collection(config.COLLECTION_DATA)
+  .doc(config.COLLECTION_DATA_DOC)
+  .get();
+if (!timestampDoc.exists) {
+  console.log('No timestamp found');
+  return;
+}
+const timestamp = new Date(
+  timestampDoc.data().last_fetched_for_csv._seconds * 1000
+);
+```
+
+Here, we're checking the `COLLECTION_DATA` table for our `COLLECTION_DATA_DOC` document (locally, we don't have a `.env` file, so these will default to `radio` and `radio_data`). If the document doesn't exist we have no reason to keep executing the code, so we'll log a message and return from the function.
+
+If the timestamp _does_ exist, we need to format it. Because the `timestamp` field is of datatype 'timestamp', Firestore returns an _object_ with two fields: `_seconds` and `_nanoseconds`. Because we need our `timestamp` variable to be an actual date, we simply take its `_seconds` property, multiply it by 1000 (to convert it to milliseconds) and convert that into a Date object.
+
+Logging the `timestamp` variable returns _1969-12-31T23:00:06.000Z_ (timezones, eh?) - so we're good to continue!
+
+### Fetching Data
+
+Now that we know the timestamp to start our database query from, we can now fetch the data from the `radio` collection:
+
+```javascript
+// Pull the collection data
+const snapshot = await db
+  .collection(config.COLLECTION)
+  .where('timestamp', '>', new Date(config.FROM_TIMESTAMP))
+  .orderBy('timestamp')
+  .limit(config.LIMIT)
+  .get();
+if (snapshot.size === 0) {
+  console.log('No records found!');
+  return;
+}
+```
+
+Here, we're requesting all documents from the `radio` collection (or whatever we override it to be in the environment) that have a `timestamp` value greater than the last time we ran this script (currently the year 1970). We're sorting all of the results by their `timestamp` (ascending) and limiting the total results to 5 (or whatever we override it to be).
+
+If absolutely no data is returned, there is no point continuing to execute the function, so we'll simply log something to the console and return out of the function (ending the script).
+
+### Formatting the Data
+
+Once we have the data, we simply need to map it into an easily-readable array.
+
+```javascript
+// Map the data into an array of objects
+const records = snapshot.docs.map(doc => {
+  const data = doc.data();
+  return {
+    ...data,
+    timestamp: new Date(data.timestamp._seconds * 1000).toISOString()
+  };
+});
+```
+
+The code for this looks much more complicated than it actually is (and is likely more complicated than it will need to be!). As with our `timestamp` variable created above, we encounter the exact same issue with our radio documents as well: there is a field of type 'timestamp' which exists on our documents, meaning it is actually an object made by Firestore rather than a JavaScript DateTime object.
+
+Because we want to store an ISO DateTime string in our CSV file, rather than an object with two properties, we simply need to convert the `timestamp` field into an ISO string when calling the `map()` function. If we had stored the timestamp as a datatype 'string' in Firestore, we could have avoided this extra step and ran the entire `map()` function in one line.
+
+## Writing to CSV
+
+The next step is to use the [csv-writer](https://www.npmjs.com/package/csv-writer) library to format the formatted array of documents into a readable CSV format.
+
+Because of the nature of JSON objects, we can't guarantee that the keys of the records will always be in the same order. To generate the header of the CSV, we can't use `Object.keys()` on the document; it might change every time we execute the script and our files will be mismatched.
+
+Instead, we can define which fields (and therefore the order of those fields) we want to have in the CSV file.
+
+```javascript
+// List the fields we want (and also the order)
+const fields = ['station', 'song', 'artist', 'timestamp'];
+```
+
+Next, we'll want to import the `csv-writer` library into the top of our file:
+
+```javascript
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+```
+
+and call the function in our `run` method:
+
+```javascript
+// Create a CSV Writer
+const path = `${config.COLLECTION}_${new Date().toISOString()}.csv`;
+const csvWriter = createCsvWriter({
+  header: fields.map(key => ({ id: key, title: key })),
+  path
+});
+await csvWriter.writeRecords(records);
+```
+
+The first line declares a new `path` variable, which is where the CSV file will be written to. We declare this as a new variable so we can use the same pathname to upload the file to Cloud Storage later on.
+
+The name of the CSV can generally be anything, though I recommend having some form of timestamp or unique identifier present so there is no risk of naming conflicts when the CSV is written or uploaded.
+
+We then call the `createCsvWriter` method which takes two parameters: our header fields and the path itself.
+
+Note that we don't just pass in our `fields` array directly into the `header` property, but instead map it into an object. This is because the `header` field actually requires an array of objects, each which must have two fields: `id` and `title`. The `id` field is used to map the header to the correspondingly-named field in our data (regardless of the order of the JSON object), and the `title` field determines what the display text should be on the CSV. We simply map the name of the field to both here, since it makes sense to keep the title the same.
+
+Once the last line of this code has executed, a CSV file will be written to the current directory (as we didn't specify any path) with all of the data we need.
+
+### Updating the last timestamp
+
+We now need to update our document in the `radio_data` collection to store the timestamp of the most recent document we just fetched. This will mean the next execution of this script will start from this time, skipping everything we've already collected.
+
+```javascript
+// Update the timestamp in the database
+await db
+  .collection(config.COLLECTION_DATA)
+  .doc(config.COLLECTION_DATA_DOC)
+  .update({
+    last_fetched_for_csv: new Date(records[records.length - 1].timestamp)
+  });
+```
+
+If we run our code multiple times, we'll have a few different CSV files all with different data in!
+
+### Uploading the CSV to Cloud Storage
+
+Our CSV files can't stay on our Cloud Function forever, so we'll need to upload them to a storage bucket so that they aren't lost. If you are only planning on running this script locally, you can completely skip this step.
+
+The first step is to declare the npm module at the top of our script:
+
+```javascript
+const { Storage } = require('@google-cloud/storage');
+```
+
+We'll also want to add another variable to our `config` object:
+
+```javascript
+BUCKET_NAME: process.env.BUCKET_NAME || 'storage-bucket-name';
+```
+
+Because the same service account we used to fetch data from the database also has access to create storage objects, we can use the same JSON file. In our `run` method, just after declaring our `db` variable (and before fetching the timestamp), we'll want to write very similar code but for Cloud Storage:
+
+```javascript
+// Initialise the storage bucket
+const storage =
+  process.env.NODE_ENV === 'production'
+    ? new Storage()
+    : new Storage({ keyFilename: './service-account.json' });
+```
+
+At the end of our `run` method, we can finally run a small amount of code to move the file into the storage bucket:
+
+```javascript
+// Upload to the Storage Bucket
+const bucket = storage.bucket(config.BUCKET_NAME);
+await bucket.upload(path);
+```
+
+## Conclusion
+
+That's all there is to it! Whilst we didn't deploy this to be a Cloud Function, the code should work out of the box - so long as the correct environment variables are defined!

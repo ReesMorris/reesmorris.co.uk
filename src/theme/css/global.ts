@@ -12,6 +12,7 @@ export const globalCSS = css`
     background-color: ${themeVar('color-background')};
     color: ${themeVar('color-text-base')};
     font-family: ${staticThemeVar('font-family')};
-    font-size: ${staticThemeVar('base-font-size')};
+    font-size: ${staticThemeVar('font-size-base')};
+    line-height: ${staticThemeVar('line-height-base')};
   }
 `;

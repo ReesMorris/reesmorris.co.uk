@@ -17,7 +17,6 @@ export type ThemeToken =
 
 export type StaticThemeToken =
   | 'base-rem-size'
-  | 'base-font-size'
   | 'border-radius-none'
   | 'border-radius-small'
   | 'border-radius-medium'
@@ -47,6 +46,10 @@ export type StaticThemeToken =
   | 'color-gray-9'
   | 'color-white'
   | 'font-family'
+  | 'line-height-base'
+  | 'line-height-small'
+  | 'line-height-medium'
+  | 'line-height-large'
   | 'opacity-black-1'
   | 'opacity-black-2'
   | 'opacity-black-3'
@@ -79,6 +82,7 @@ export type StaticThemeToken =
   | 'font-size-5'
   | 'font-size-6'
   | 'font-size-7'
+  | 'font-size-base'
   | 'font-weight-light'
   | 'font-weight-normal'
   | 'font-weight-semibold'
