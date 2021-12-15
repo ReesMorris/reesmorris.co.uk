@@ -1,3 +1,5 @@
+import { MDXRemoteSerializeResult } from 'next-mdx-remote';
+
 export interface MDXMetadata {
   title: string;
   summary: string;
@@ -6,5 +8,5 @@ export interface MDXMetadata {
 }
 export interface MDXFile {
   metadata: MDXMetadata;
-  body: string | null;
+  source: MDXRemoteSerializeResult;
 }

@@ -5,7 +5,7 @@ const Index = () => {
   return (
     <Page seo={{ canonical: 'https://reesmorris.co.uk' }}>
       <ForwardLayout margin={{ bottom: 1 }}>
-        <Heading size={FontSize.Size2}>About Me</Heading>
+        <Heading fontSize={FontSize.Size2}>About Me</Heading>
       </ForwardLayout>
       <ForwardLayout margin={{ bottom: 2 }}>
         <Text>

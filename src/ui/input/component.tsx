@@ -40,7 +40,7 @@ const ScInput = styled.input<InputStyleProps>`
   color: ${themeVar('color-input-text')};
   background-color: ${themeVar('color-input-background')};
   border: 1px solid ${themeVar('color-input-border')};
-  font-size: ${staticThemeVar('font-size-6')};
+  font-size: ${staticThemeVar('font-size-7')};
 
   height: ${interpolateProp('$size', {
     [UISize.Small]: staticThemeVar('ui-nowrap-size-small'),

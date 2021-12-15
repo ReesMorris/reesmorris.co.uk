@@ -11,7 +11,7 @@ import {
   LineHeight
 } from '~/ui';
 import { MDXMetadata } from '~/utils/mdx';
-import { formatDate } from '~/utils/date';
+import { formatDate } from '~/utils';
 
 interface BlogPostPreviewProps {
   metadata: MDXMetadata;
@@ -23,23 +23,23 @@ export const BlogPostPreview = (props: BlogPostPreviewProps) => {
   return (
     <article>
       <header>
-        <Link
-          href={`/blog/${slug}`}
-          color={LinkColor.Inherit}
-          colorHover={LinkColor.Inherit}
-        >
-          <ForwardLayout margin={{ bottom: 0.5 }}>
-            <Heading
-              type={HeadingType.H3}
-              size={FontSize.Size5}
-              lineHeight={LineHeight.Small}
+        <ForwardLayout margin={{ bottom: 0.5 }}>
+          <Heading
+            type={HeadingType.H3}
+            fontSize={FontSize.Size5}
+            lineHeight={LineHeight.Small}
+          >
+            <Link
+              href={`/blog/${slug}`}
+              color={LinkColor.Inherit}
+              colorHover={LinkColor.Inherit}
             >
               {title}
-            </Heading>
-          </ForwardLayout>
-        </Link>
+            </Link>
+          </Heading>
+        </ForwardLayout>
       </header>
-      <Text size={FontSize.Size6}>
+      <Text fontSize={FontSize.Size6}>
         <ForwardLayout color={Color.Lighter}>
           <Text type={TextType.Span}>{formatDate(date)} &middot; </Text>
         </ForwardLayout>

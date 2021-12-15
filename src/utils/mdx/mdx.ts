@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { remark } from 'remark';
+import rehypePrism from '@mapbox/rehype-prism';
+import { serialize } from 'next-mdx-remote/serialize';
 import { MDXFile, MDXMetadata } from './types';
 
 const root = process.cwd();
@@ -19,22 +20,18 @@ const getFileContent = async (type: Type, slug: string) => {
 };
 
 // Returns a single file from a directory
-export const getFile = async (
-  type: Type,
-  slug: string,
-  withBody = false
-): Promise<MDXFile> => {
+export const getFile = async (type: Type, slug: string): Promise<MDXFile> => {
   const fileContent = await getFileContent(type, slug);
   const { content, data } = matter(fileContent);
 
-  let body = null;
-  if (withBody) {
-    const { value } = await remark().process(content);
-    body = value.toString();
-  }
+  const source = await serialize(content, {
+    mdxOptions: {
+      rehypePlugins: [rehypePrism]
+    }
+  });
 
   return {
-    body,
+    source,
     metadata: {
       ...data,
       slug: slug.replace('.mdx', '')
@@ -47,7 +44,7 @@ export const getFiles = async (type: Type): Promise<MDXFile[]> => {
   const files = await getFilesInDirectory(type);
 
   return await files.reduce(async (acc: Promise<MDXFile[]>, curr) => {
-    const metadata = await getFile(type, curr, false);
+    const metadata = await getFile(type, curr);
     return [...(await acc), { ...metadata }];
   }, Promise.resolve([]));
 };

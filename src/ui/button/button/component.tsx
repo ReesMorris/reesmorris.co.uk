@@ -4,10 +4,10 @@ import { UISize, BorderRadius, Transition } from '../../types';
 import { staticThemeVar, themeVar } from '~/theme';
 import { interpolateProp } from '../../utils';
 import { transition } from '../../utils/transition';
+import { ForwardLayout } from '../..';
 
 interface ButtonStyleProps {
   $size?: UISize;
-  $radius?: BorderRadius;
   $variant?: ButtonVariant;
 }
 
@@ -36,14 +36,6 @@ const ScButton = styled.button<ButtonStyleProps>`
     [UISize.Large]: staticThemeVar('ui-nowrap-size-large')
   })};
 
-  border-radius: ${interpolateProp('$radius', {
-    [BorderRadius.None]: staticThemeVar('border-radius-none'),
-    [BorderRadius.Small]: staticThemeVar('border-radius-small'),
-    [BorderRadius.Medium]: staticThemeVar('border-radius-medium'),
-    [BorderRadius.Large]: staticThemeVar('border-radius-large'),
-    [BorderRadius.Round]: staticThemeVar('border-radius-round')
-  })};
-
   &[data-variant=${ButtonVariant.Text}] {
     color: ${themeVar('color-button-default-text')};
     &:hover {
@@ -64,15 +56,16 @@ export const Button = (props: ButtonProps) => {
   const { as, type, variant, size, radius, children, ...rest } = props;
 
   return (
-    <ScButton
-      as={as}
-      type={type || as ? undefined : 'button'}
-      $size={size || UISize.Medium}
-      $radius={radius || BorderRadius.Small}
-      data-variant={variant || ButtonVariant.Text}
-      {...rest}
-    >
-      {children}
-    </ScButton>
+    <ForwardLayout borderRadius={radius}>
+      <ScButton
+        as={as}
+        type={type || as ? undefined : 'button'}
+        $size={size || UISize.Medium}
+        data-variant={variant || ButtonVariant.Text}
+        {...rest}
+      >
+        {children}
+      </ScButton>
+    </ForwardLayout>
   );
 };

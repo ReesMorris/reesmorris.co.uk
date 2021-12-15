@@ -40,7 +40,7 @@ const Blog = ({ posts }: BlogProps) => {
         emoji: '📝'
       }}
     >
-      <Heading size={FontSize.Size2}>Blog</Heading>
+      <Heading fontSize={FontSize.Size2}>Blog</Heading>
       <Text>
         I love to write about technology, games, and everything inbetween. Feel
         free to browse any of the {posts.length} posts I&apos;ve written to
@@ -57,10 +57,12 @@ const Blog = ({ posts }: BlogProps) => {
         />
       </Layout>
 
-      <Layout margin={{ top: 2 }}>
-        <Heading type={HeadingType.H2} size={FontSize.Size3}>
-          All Posts
-        </Heading>
+      <Layout margin={{ top: 2.5 }}>
+        <ForwardLayout margin={{ bottom: 1 }}>
+          <Heading type={HeadingType.H2} fontSize={FontSize.Size3}>
+            All Posts
+          </Heading>
+        </ForwardLayout>
 
         {filtered.length > 0 ? (
           filtered.map(({ metadata }) => (

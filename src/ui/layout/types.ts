@@ -1,3 +1,5 @@
+import { BorderRadius, FontSize } from '..';
+
 export interface LayoutProps {
   margin?: Margin;
   padding?: Padding;
@@ -5,8 +7,11 @@ export interface LayoutProps {
   width?: string;
   gap?: SpaceValue;
   justifyContent?: JustifyContent;
+  alignItems?: AlignItems;
   flexWrap?: FlexWrap;
   color?: Color;
+  borderRadius?: BorderRadius;
+  fontSize?: FontSize;
   breakpointSmall?: Breakpoint;
   breakpointMedium?: Breakpoint;
   breakpointLarge?: Breakpoint;
@@ -14,7 +19,7 @@ export interface LayoutProps {
   children?: React.ReactNode;
 }
 
-export type SpaceValue = 0 | 0.5 | 1 | 2 | 3 | 4 | 5;
+export type SpaceValue = 0 | 0.5 | 1 | 1.5 | 2 | 2.5 | 3 | 4 | 5;
 
 export type MarginValue = SpaceValue | 'auto';
 export type Margin = {
@@ -48,6 +53,16 @@ export type Breakpoint = Omit<
   LayoutProps,
   'breakpointSmall' | 'breakpointMedium' | 'breakpointLarge'
 >;
+
+export enum AlignItems {
+  Stretch = 'stretch',
+  Center = 'center',
+  FlexStart = 'flex-start',
+  FlexEnd = 'flex-end',
+  Baseline = 'baseline',
+  Initial = 'initial',
+  Inherit = 'inherit'
+}
 
 export enum JustifyContent {
   FlexStart = 'flex-start',

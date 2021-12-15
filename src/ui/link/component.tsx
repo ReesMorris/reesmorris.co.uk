@@ -16,7 +16,7 @@ interface LinkStyleProps {
   $color?: LinkColor;
   $colorHover?: LinkColor;
 }
-interface LinkProps
+export interface LinkProps
   extends LinkStyleProps,
     Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'color'> {
   href: string;

@@ -1,5 +1,7 @@
 import { StaticThemeToken, ThemeToken } from '../tokens';
 
-export const themeVar = (token: ThemeToken) => `var(--${token});`;
+// NB: adding a semicolon (;) to the end will break any calc() functions with this!
 
-export const staticThemeVar = (token: StaticThemeToken) => `var(--${token});`;
+export const themeVar = (token: ThemeToken) => `var(--${token})`;
+
+export const staticThemeVar = (token: StaticThemeToken) => `var(--${token})`;

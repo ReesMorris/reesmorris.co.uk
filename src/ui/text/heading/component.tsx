@@ -1,5 +1,5 @@
 import { Text, TextProps } from '../text';
-import { HeadingType, FontWeight } from '../types';
+import { HeadingType, FontWeight, LineHeight } from '../types';
 
 interface HeadingProps extends TextProps {
   type?: HeadingType;
@@ -12,6 +12,7 @@ export const Heading = (props: HeadingProps) => {
     <Text
       type={type || HeadingType.H1}
       weight={props.weight || FontWeight.Bold}
+      lineHeight={props.lineHeight || LineHeight.Small}
       {...rest}
     >
       {children}

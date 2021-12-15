@@ -11,7 +11,7 @@ export const mapProps = (props: LayoutProps) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const value: any = propMap[propName];
 
-      if (value) css += value(v);
+      if (value && v) css += value(v);
     }
   });
 

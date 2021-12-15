@@ -6,7 +6,9 @@ export const spacingMap: Record<MarginValue | PaddingValue, string> = {
   0: staticThemeVar('space-0'),
   0.5: staticThemeVar('space-05'),
   1: staticThemeVar('space-1'),
+  1.5: staticThemeVar('space-15'),
   2: staticThemeVar('space-2'),
+  2.5: staticThemeVar('space-25'),
   3: staticThemeVar('space-3'),
   4: staticThemeVar('space-4'),
   5: staticThemeVar('space-5')

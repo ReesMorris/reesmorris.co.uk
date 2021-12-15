@@ -11,7 +11,7 @@ export const globalCSS = css`
   body {
     background-color: ${themeVar('color-background')};
     color: ${themeVar('color-text-base')};
-    font-family: ${staticThemeVar('font-family')};
+    font-family: ${staticThemeVar('font-family-base')};
     font-size: ${staticThemeVar('font-size-base')};
     line-height: ${staticThemeVar('line-height-base')};
   }
