@@ -3,7 +3,7 @@ import {
   ThemeProvider as NextThemeProvider,
   useTheme as NextUseTheme
 } from 'next-themes';
-import { globalCSS, resetCSS, rootCSS } from '~/theme';
+import { globalCSS, resetCSS, rootCSS } from '..';
 
 interface ThemeProviderProps {
   children?: React.ReactNode;

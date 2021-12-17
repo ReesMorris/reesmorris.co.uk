@@ -1,5 +1,5 @@
 import type { AppProps } from 'next/app';
-import { ThemeProvider } from '~/providers';
+import { ThemeProvider } from '~/theme';
 import { TabProvider } from '~/ui';
 import '../libs/fontawesome';
 
