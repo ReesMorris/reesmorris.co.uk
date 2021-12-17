@@ -1,7 +1,7 @@
 import { Breakpoint, BreakpointSize } from '../types';
 import { staticTokens } from '~/theme';
 import { mapProps } from '.';
-import { toRem } from '../../utils/to-rem';
+import { toRem } from '../../utils';
 
 export const breakpoint = (size: BreakpointSize) => (props: Breakpoint) =>
   `@media screen and (max-width: ${toRem(

@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { LayoutProps } from './types';
-import { mapProps } from './utils/map-props';
-import { propMap } from './utils/prop-map';
+import { mapProps, propMap } from './utils';
 
 export const Layout = styled('div', {
   shouldForwardProp: prop => !(prop in propMap)

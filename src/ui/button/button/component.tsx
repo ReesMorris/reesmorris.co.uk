@@ -2,8 +2,7 @@ import styled from '@emotion/styled';
 import { ButtonVariant } from '../types';
 import { UISize, BorderRadius, Transition } from '../../types';
 import { staticThemeVar, themeVar } from '~/theme';
-import { interpolateProp } from '../../utils';
-import { transition } from '../../utils/transition';
+import { interpolateProp, transition } from '../../utils';
 import { ForwardLayout } from '../..';
 
 interface ButtonStyleProps {

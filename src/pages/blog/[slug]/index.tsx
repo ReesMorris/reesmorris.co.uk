@@ -10,8 +10,7 @@ import {
   Heading,
   Layout,
   Note,
-  NoteProps,
-  ForwardLayout
+  NoteProps
 } from '~/ui';
 
 interface BlogPostProps {
@@ -37,7 +36,8 @@ const BlogPost = ({ post }: BlogPostProps) => {
         <MDXRemote
           {...post.source}
           components={{
-            a: (props: LinkProps) => <Link {...props} />
+            a: (props: LinkProps) => <Link {...props} />,
+            Note: (props: NoteProps) => <Note {...props} />
           }}
         />
       </Typeset>

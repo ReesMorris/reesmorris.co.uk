@@ -47,13 +47,14 @@ const ScTypeset = styled.div`
   }
 
   blockquote {
+    color: ${themeVar('color-blockquote-text')};
     padding-top: ${staticThemeVar('space-1')};
     padding-left: ${staticThemeVar('space-2')};
     padding-bottom: ${staticThemeVar('space-1')};
     margin-bottom: ${staticThemeVar('space-2')};
-    border-left-width: ${staticThemeVar('blockquote-border-width')};
+    border-left-width: ${staticThemeVar('border-width-blockquote')};
     border-left-style: solid;
-    border-left-color: ${themeVar('blockquote-border-color')};
+    border-left-color: ${themeVar('color-blockquote-border')};
   }
 
   pre,
@@ -104,6 +105,11 @@ const ScTypeset = styled.div`
     .spread {
       color: inherit;
     }
+  }
+
+  .note pre {
+    margin-left: 0;
+    margin-right: 0;
   }
 `;
 

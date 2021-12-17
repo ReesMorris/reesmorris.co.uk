@@ -4,6 +4,7 @@ export * from './image';
 export * from './input';
 export * from './layout';
 export * from './link';
+export * from './note';
 export * from './text';
 export * from './types';
 export * from './typeset';

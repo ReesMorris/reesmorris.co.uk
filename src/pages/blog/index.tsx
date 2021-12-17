@@ -25,9 +25,11 @@ const Blog = ({ posts }: BlogProps) => {
   // filter posts by input
   const filtered = useMemo(
     () =>
-      posts.filter(post =>
-        post.metadata.title.toLowerCase().includes(input.toLowerCase())
-      ),
+      posts
+        .filter(post =>
+          post.metadata.title.toLowerCase().includes(input.toLowerCase())
+        )
+        .sort((a, b) => (a.metadata.date < b.metadata.date ? 1 : -1)),
     [posts, input]
   );
 

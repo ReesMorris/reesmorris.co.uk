@@ -2,9 +2,8 @@ import styled from '@emotion/styled';
 import { staticThemeVar, staticTokens, themeVar } from '~/theme';
 import { BorderRadius, UISize } from '../types';
 import { interpolateProp } from '../utils';
-import { placeholder } from '../utils/placeholder';
+import { placeholder, toRem } from '../utils';
 import { Icon, IconProps } from '..';
-import { toRem } from '../utils/to-rem';
 
 interface InputStyleProps {
   $size?: UISize;

@@ -20,7 +20,7 @@ The main issue for websites running CSS-in-JS solutions like [styled-components]
 
 In this post, I'm going to break down and showcase and most secure way to implement a CSP on a website running Next.js and styled-components. This is a follow-along guide, so do feel free to get stuck in!
 
-<Note type='info' icon={{ icon: 'sparkles' }}>
+<Note type='info' icon={{ name: 'sparkles' }}>
 
 If you are using the built-in [styled-jsx](https://github.com/vercel/styled-jsx) library with Next.js, you may not need this guide! There's a fairly well hidden [example repo](https://github.com/vercel/next.js/tree/canary/examples/with-strict-csp) which can solve this in just a few lines of code.
 
@@ -30,7 +30,7 @@ If you are using the built-in [styled-jsx](https://github.com/vercel/styled-jsx)
 
 I'm going to assume that you already have a Next.js application running with styled-components set up. If not, but you still want in, I've created a ['follow-along' branch](https://github.com/ReesMorris/nextjs-styled-components-csp/tree/follow-along) with everything you'll need to get started.
 
-<Note type='info' icon={{ icon: 'exclamation-circle' }}>
+<Note type='info' icon={{ name: 'exclamation-circle' }}>
 
 One of the major caveats of implementing a proper CSP header with Next.js and styled-components is that **[automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization) must be disabled across the application**. This is because we will need to generate a [nonce](https://content-security-policy.com/nonce/) on the server to be read via the `ctx.res` property on a custom [document](https://nextjs.org/docs/advanced-features/custom-document) page, which is not possible for pages that are prerendered (see the [caveats](https://nextjs.org/docs/advanced-features/automatic-static-optimization#caveats) on static optimisation).
 
@@ -225,7 +225,7 @@ In order for the browser to allow us to use inline scripts and styles _without_ 
 
 By definition, a nonce is a randomly generated token that should only be used once. The idea is that we'll generate the nonce on the server side and attach it to our CSP headers as an allowed value (something like `'nonce-xyz'`). We'll then pass it through to the frontend and attach it to all of our scripts and styles using the `nonce` attribute. Before executing any scripts/styles, the browser will then compare the attribute on the element with the value in the CSP header. If the two match, they are considered genuine and will be allowed to run. Simple!
 
-<Note type='info' icon={{ icon: 'exclamation-circle' }}>
+<Note type='info' icon={{ name: 'exclamation-circle' }}>
 
 If you are developing for IE11, the `nonce` attribute is not supported by the browser. With that said, the `Content-Security-Policy` header is not supported either (only _X-Content-Security-Policy_ is supported). This means that the use of inline styling will not affect visitors using IE11, though it may be worth considering another approach using the [sandbox](https://docs.microsoft.com/en-us/archive/blogs/ie/defense-in-depth-locking-down-mash-ups-with-html5-sandbox) directive.
 
@@ -310,7 +310,7 @@ return {
 };
 ```
 
-<Note type='info' icon={{ icon: 'sparkles' }}>
+<Note type='info' icon={{ name: 'sparkles' }}>
 
 If `ctx.res` is returning _undefined_, it means your application has not disabled [automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization). Please check the [Setup](#setup) section for more information on this.
 
@@ -434,7 +434,7 @@ return (
 );
 ```
 
-<Note type='info' icon={{ icon: 'graduation-cap' }}>
+<Note type='info' icon={{ name: 'graduation-cap' }}>
 
 Although it might sound counter-productive exposing the nonce value in the source code, it's actually completely safe from XSS attacks. Attackers would still need to know the nonce value in advance before they can read the value of the `__webpack_nonce__` variable, since their injected scripts would be blocked without it.
 

@@ -14,7 +14,10 @@ import {
   faSun,
   faMoon,
   faEnvelope,
-  faSearch
+  faSearch,
+  faSparkles,
+  faExclamationCircle,
+  faGraduationCap
 } from '@fortawesome/pro-light-svg-icons';
 
 library.add(
@@ -24,5 +27,8 @@ library.add(
   faGithub,
   faLinkedin,
   faEnvelope,
-  faSearch
+  faSearch,
+  faSparkles,
+  faExclamationCircle,
+  faGraduationCap
 );
