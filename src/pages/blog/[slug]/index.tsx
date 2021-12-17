@@ -10,7 +10,13 @@ import {
   Heading,
   Layout,
   Note,
-  NoteProps
+  NoteProps,
+  TabList,
+  TabListProps,
+  TabPanel,
+  TabPanelProps,
+  TabContent,
+  TabContentProps
 } from '~/ui';
 
 interface BlogPostProps {
@@ -37,7 +43,10 @@ const BlogPost = ({ post }: BlogPostProps) => {
           {...post.source}
           components={{
             a: (props: LinkProps) => <Link {...props} />,
-            Note: (props: NoteProps) => <Note {...props} />
+            Note: (props: NoteProps) => <Note {...props} />,
+            TabList: (props: TabListProps) => <TabList {...props} />,
+            TabPanel: (props: TabPanelProps) => <TabPanel {...props} />,
+            TabContent: (props: TabContentProps) => <TabContent {...props} />
           }}
         />
       </Typeset>

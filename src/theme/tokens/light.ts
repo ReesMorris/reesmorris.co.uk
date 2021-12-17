@@ -23,6 +23,7 @@ export const lightTokens: ThemeTokens = {
   'color-input-placeholder': staticThemeVar('opacity-black-6'),
   'color-input-text': staticThemeVar('color-black'),
   'color-note-border': staticThemeVar('color-gray-2'),
+  'color-tablist-border': staticThemeVar('color-gray-2'),
   'color-text-lighter': staticThemeVar('color-gray-13'),
   'color-text-link': staticThemeVar('color-blue-8'),
   'color-text-link-hover': staticThemeVar('color-blue-9'),

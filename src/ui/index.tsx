@@ -5,6 +5,7 @@ export * from './input';
 export * from './layout';
 export * from './link';
 export * from './note';
+export * from './tabs';
 export * from './text';
 export * from './types';
 export * from './typeset';

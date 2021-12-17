@@ -23,8 +23,9 @@ export const darkTokens: ThemeTokens = {
   'color-input-placeholder': staticThemeVar('opacity-white-6'),
   'color-input-text': staticThemeVar('color-white'),
   'color-note-border': staticThemeVar('color-gray-13'),
+  'color-tablist-border': staticThemeVar('color-gray-13'),
   'color-text-lighter': staticThemeVar('color-gray-2'),
-  'color-text-link': staticThemeVar('color-blue-5'),
+  'color-text-link': staticThemeVar('color-blue-4'),
   'color-text-link-hover': staticThemeVar('color-blue-4'),
   'color-text-base': staticThemeVar('color-white')
 };

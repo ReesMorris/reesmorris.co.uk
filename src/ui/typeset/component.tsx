@@ -26,7 +26,8 @@ const ScTypeset = styled.div`
   ul,
   ol,
   pre,
-  .note {
+  .note,
+  .tabs {
     margin-bottom: ${staticThemeVar('space-2')};
 
     &:last-child {
@@ -71,10 +72,13 @@ const ScTypeset = styled.div`
     padding: ${staticThemeVar('space-05')};
   }
 
-  pre {
-    background-color: ${themeVar('color-code-background')};
+  & > pre {
     margin-left: calc(${staticThemeVar('space-2')} * -1);
     margin-right: calc(${staticThemeVar('space-2')} * -1);
+  }
+
+  pre {
+    background-color: ${themeVar('color-code-background')};
     margin-bottom: ${staticThemeVar('space-2')};
     padding: ${staticThemeVar('space-15')};
     overflow-x: auto;
@@ -105,11 +109,6 @@ const ScTypeset = styled.div`
     .spread {
       color: inherit;
     }
-  }
-
-  .note pre {
-    margin-left: 0;
-    margin-right: 0;
   }
 `;
 
