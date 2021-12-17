@@ -13,11 +13,11 @@ import {
 import { MDXMetadata } from '~/utils/mdx';
 import { formatDate } from '~/utils';
 
-interface BlogPostPreviewProps {
+interface PreviewCardProps {
   metadata: MDXMetadata;
 }
 
-export const BlogPostPreview = (props: BlogPostPreviewProps) => {
+export const PreviewCard = (props: PreviewCardProps) => {
   const { title, slug, summary, date } = props.metadata;
 
   return (
@@ -27,7 +27,7 @@ export const BlogPostPreview = (props: BlogPostPreviewProps) => {
           <Heading
             type={HeadingType.H3}
             fontSize={FontSize.Size5}
-            lineHeight={LineHeight.Small}
+            lineHeight={LineHeight.Medium}
           >
             <Link
               href={`/blog/${slug}`}

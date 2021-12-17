@@ -25,8 +25,13 @@ const ScTypeset = styled.div`
   p,
   ul,
   ol,
-  pre {
+  pre,
+  .note {
     margin-bottom: ${staticThemeVar('space-2')};
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 
   ul {

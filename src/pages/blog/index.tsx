@@ -1,6 +1,6 @@
 import { GetStaticProps } from 'next';
 import { useMemo, useState } from 'react';
-import { Page, BlogPostPreview } from '~/components';
+import { Page } from '~/components';
 import {
   FontSize,
   Heading,
@@ -13,6 +13,7 @@ import {
   Color
 } from '~/ui';
 import { getFiles, MDXFile } from '~/utils/mdx';
+import { PreviewCard } from './components';
 
 interface BlogProps {
   posts: MDXFile[];
@@ -67,7 +68,7 @@ const Blog = ({ posts }: BlogProps) => {
         {filtered.length > 0 ? (
           filtered.map(({ metadata }) => (
             <Layout key={metadata.date} margin={{ bottom: 2 }}>
-              <BlogPostPreview metadata={metadata} />
+              <PreviewCard metadata={metadata} />
             </Layout>
           ))
         ) : (

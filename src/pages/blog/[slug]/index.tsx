@@ -1,8 +1,18 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { getFile, MDXFile, getFilesInDirectory } from '~/utils/mdx';
 import { MDXRemote } from 'next-mdx-remote';
-import { Page, BlogAuthor } from '~/components';
-import { Typeset, Link, LinkProps, Heading, Layout } from '~/ui';
+import { Page } from '~/components';
+import { AuthorRow } from './components';
+import {
+  Typeset,
+  Link,
+  LinkProps,
+  Heading,
+  Layout,
+  Note,
+  NoteProps,
+  ForwardLayout
+} from '~/ui';
 
 interface BlogPostProps {
   post: MDXFile;
@@ -21,7 +31,7 @@ const BlogPost = ({ post }: BlogPostProps) => {
     >
       <Heading>{post.metadata.title}</Heading>
       <Layout margin={{ top: 1.5, bottom: 2 }}>
-        <BlogAuthor metadata={post.metadata} />
+        <AuthorRow metadata={post.metadata} />
       </Layout>
       <Typeset>
         <MDXRemote

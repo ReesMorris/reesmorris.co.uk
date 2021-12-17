@@ -12,11 +12,11 @@ import { MDXMetadata } from '~/utils/mdx';
 import { formatDate } from '~/utils';
 import ReesMorris from '~/images/rees-morris.png';
 
-export interface BlogAuthorProps {
+export interface AuthorRowProps {
   metadata: MDXMetadata;
 }
 
-export const BlogAuthor = (props: BlogAuthorProps) => {
+export const AuthorRow = (props: AuthorRowProps) => {
   const { metadata } = props;
 
   return (
