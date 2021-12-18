@@ -20,7 +20,7 @@ The main issue for websites running CSS-in-JS solutions like [styled-components]
 
 In this post, I'm going to break down and showcase and most secure way to implement a CSP on a website running Next.js and styled-components. This is a follow-along guide, so do feel free to get stuck in!
 
-<Note type='info' icon={{ icon: 'sparkles' }}>
+<Note type='info' icon={{ name: 'sparkles' }}>
 
 If you are using the built-in [styled-jsx](https://github.com/vercel/styled-jsx) library with Next.js, you may not need this guide! There's a fairly well hidden [example repo](https://github.com/vercel/next.js/tree/canary/examples/with-strict-csp) which can solve this in just a few lines of code.
 
@@ -30,7 +30,7 @@ If you are using the built-in [styled-jsx](https://github.com/vercel/styled-jsx)
 
 I'm going to assume that you already have a Next.js application running with styled-components set up. If not, but you still want in, I've created a ['follow-along' branch](https://github.com/ReesMorris/nextjs-styled-components-csp/tree/follow-along) with everything you'll need to get started.
 
-<Note type='info' icon={{ icon: 'exclamation-circle' }}>
+<Note type='info' icon={{ name: 'exclamation-circle' }}>
 
 One of the major caveats of implementing a proper CSP header with Next.js and styled-components is that **[automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization) must be disabled across the application**. This is because we will need to generate a [nonce](https://content-security-policy.com/nonce/) on the server to be read via the `ctx.res` property on a custom [document](https://nextjs.org/docs/advanced-features/custom-document) page, which is not possible for pages that are prerendered (see the [caveats](https://nextjs.org/docs/advanced-features/automatic-static-optimization#caveats) on static optimisation).
 
@@ -63,8 +63,10 @@ The main directive is `default-src`, which acts as the fallback if a more specif
 Due to this, a good rule of thumb is to start with _only_ this directive, and expand your policy outwards until the website returns to its normal behaviour. We'll be assigning the directive the value of `'none'` (notice the single quotes around the string), which block _all_ [fetch directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#fetch_directives) from running. There's a bit more information on what 'none' represents [here](https://content-security-policy.com/none/).
 
 <TabList tabs={['With Express', 'Without Express']}>
+  
+<TabPanel>
 
-  <TabPanel>
+<TabContent>
 
 You'll firstly want to create a middleware function in your Express server that intercepts all requests and returns the CSP header with the `default-src` directive set to `'none'`:
 
@@ -77,9 +79,13 @@ server.use((_req: Request, res: Response, next: NextFunction) => {
 
 Any time you make changes to the server (if you aren't using a tool like [nodemon](https://www.npmjs.com/package/nodemon)) you'll need to restart it completely for the changes to take effect.
 
-  </TabPanel>
-  
-  <TabPanel>
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
 
 Inside of your `pages/_document` file, you'll want to return the CSP header inside the `getInitialProps` method with the `default-src` directive set to `'none'`:
 
@@ -87,8 +93,9 @@ Inside of your `pages/_document` file, you'll want to return the CSP header insi
 ctx.res.setHeader('Content-Security-Policy', `default-src 'none';`);
 ```
 
-  </TabPanel>
+</TabContent>
 
+</TabPanel>
 </TabList>
 
 You should notice that all of the styling has disappeared, and any JavaScript code (such as button events or navigating between pages on the client side) has stopped working.
@@ -121,6 +128,8 @@ Based on the error, we'll want to update our CSP to also return a `script-src-el
 
 <TabPanel>
 
+<TabContent>
+
 ```typescript
 res.setHeader(
   'Content-Security-Policy',
@@ -128,9 +137,13 @@ res.setHeader(
 );
 ```
 
+</TabContent>
+
 </TabPanel>
 
 <TabPanel>
+
+<TabContent>
 
 ```typescript
 ctx.res.setHeader(
@@ -138,6 +151,8 @@ ctx.res.setHeader(
   `default-src 'none'; script-src 'self';`
 );
 ```
+
+</TabContent>
 
 </TabPanel>
 
@@ -185,21 +200,29 @@ Let's update our middleware to use this function:
 
 <TabList tabs={['With Express', 'Without Express']}>
 
-  <TabPanel>
+<TabPanel>
+
+<TabContent>
 
 ```typescript
 res.setHeader('Content-Security-Policy', generateCSP());
 ```
 
-  </TabPanel>
+</TabContent>
 
-  <TabPanel>
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
 
 ```typescript
 ctx.res.setHeader('Content-Security-Policy', generateCSP());
 ```
 
-  </TabPanel>
+</TabContent>
+
+</TabPanel>
 
 </TabList>
 
@@ -225,7 +248,7 @@ In order for the browser to allow us to use inline scripts and styles _without_ 
 
 By definition, a nonce is a randomly generated token that should only be used once. The idea is that we'll generate the nonce on the server side and attach it to our CSP headers as an allowed value (something like `'nonce-xyz'`). We'll then pass it through to the frontend and attach it to all of our scripts and styles using the `nonce` attribute. Before executing any scripts/styles, the browser will then compare the attribute on the element with the value in the CSP header. If the two match, they are considered genuine and will be allowed to run. Simple!
 
-<Note type='info' icon={{ icon: 'exclamation-circle' }}>
+<Note type='info' icon={{ name: 'exclamation-circle' }}>
 
 If you are developing for IE11, the `nonce` attribute is not supported by the browser. With that said, the `Content-Security-Policy` header is not supported either (only _X-Content-Security-Policy_ is supported). This means that the use of inline styling will not affect visitors using IE11, though it may be worth considering another approach using the [sandbox](https://docs.microsoft.com/en-us/archive/blogs/ie/defense-in-depth-locking-down-mash-ups-with-html5-sandbox) directive.
 
@@ -274,7 +297,9 @@ Next, let's generate the nonce and pass it into the `generateCSP()` function.
 
 <TabList tabs={['With Express', 'Without Express']}>
 
-  <TabPanel>
+<TabPanel>
+
+<TabContent>
 
 We'll need to make the nonce available to our Next.js context (`ctx`) by providing it in our Express response as a _local_.
 
@@ -310,15 +335,19 @@ return {
 };
 ```
 
-<Note type='info' icon={{ icon: 'sparkles' }}>
+<Note type='info' icon={{ name: 'sparkles' }}>
 
 If `ctx.res` is returning _undefined_, it means your application has not disabled [automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization). Please check the [Setup](#setup) section for more information on this.
 
 </Note>
 
-  </TabPanel>
+</TabContent>
+
+</TabPanel>
   
-  <TabPanel>
+<TabPanel>
+
+<TabContent>
 
 Just before calling our `ctx.res.setHeader()` method, we'll want to generate the nonce and pass it in:
 
@@ -339,7 +368,9 @@ return {
 };
 ```
 
-  </TabPanel>
+</TabContent>
+
+</TabPanel>
 
 </TabList>
 
@@ -347,7 +378,9 @@ Inside the `render` function, we can then pull the nonce:
 
 <TabList tabs={['JavaScript', 'TypeScript']}>
 
-  <TabPanel>
+<TabPanel>
+
+<TabContent>
 
 ```javascript
 render() {
@@ -359,9 +392,13 @@ render() {
   }
 ```
 
-  </TabPanel>
+</TabContent>
 
-  <TabPanel>
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
 
 At the top of the file, add the `interface` declaration:
 
@@ -391,7 +428,9 @@ render() {
   }
 ```
 
-  </TabPanel>
+</TabContent>
+
+</TabPanel>
 
 </TabList>
 
@@ -434,7 +473,7 @@ return (
 );
 ```
 
-<Note type='info' icon={{ icon: 'graduation-cap' }}>
+<Note type='info' icon={{ name: 'graduation-cap' }}>
 
 Although it might sound counter-productive exposing the nonce value in the source code, it's actually completely safe from XSS attacks. Attackers would still need to know the nonce value in advance before they can read the value of the `__webpack_nonce__` variable, since their injected scripts would be blocked without it.
 
@@ -450,7 +489,9 @@ Whilst the `window` variable (rightfully) only exists on the client, we'll need 
 
 <TabList tabs={['JavaScript', 'TypeScript']}>
 
-  <TabPanel>
+<TabPanel>
+
+<TabContent>
 
 Before calling the `getStyleElement()` method, add this line:
 
@@ -462,9 +503,13 @@ global.window = {
 
 If you're not using Express, replace `locals && locals.nonce` with `nonce`.
 
-  </TabPanel>
+</TabContent>
 
-  <TabPanel>
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
 
 At the top of the file, add the `interface` declaration:
 
@@ -484,7 +529,9 @@ Before calling the `getStyleElement()` method, add this line:
 
 If you're not using Express, replace `locals && locals.nonce` with `nonce`.
 
-  </TabPanel>
+</TabContent>
+
+</TabPanel>
 
 </TabList>
 

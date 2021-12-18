@@ -1,2 +1,2 @@
-export { getFile, getFiles, getFilesInDirectory } from './mdx';
-export type { IFile, IFileMetadata } from './mdx';
+export * from './mdx';
+export * from './types';

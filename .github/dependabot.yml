@@ -3,21 +3,21 @@ registries:
   npm-registry-npm-fontawesome-com:
     type: npm-registry
     url: https://npm.fontawesome.com
-    token: "${{secrets.NPM_REGISTRY_NPM_FONTAWESOME_COM_TOKEN}}"
+    token: '${{secrets.NPM_REGISTRY_NPM_FONTAWESOME_COM_TOKEN}}'
 
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-  reviewers:
-  - ReesMorris
-  assignees:
-  - ReesMorris
-  ignore:
-  - dependency-name: "@types/jest"
-    versions:
-    - 26.0.23
-  registries:
-  - npm-registry-npm-fontawesome-com
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    reviewers:
+      - ReesMorris
+    assignees:
+      - ReesMorris
+    ignore:
+      - dependency-name: '@types/jest'
+        versions:
+          - 26.0.23
+    registries:
+      - npm-registry-npm-fontawesome-com

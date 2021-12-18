@@ -1,23 +1,34 @@
-import { library, config } from '@fortawesome/fontawesome-svg-core';
-import { fab } from '@fortawesome/free-brands-svg-icons';
+// Fixes the custom Head component breaking the automatic CSS
+import { config } from '@fortawesome/fontawesome-svg-core';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+config.autoAddCss = false;
+
+// Our icon imports
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faEnvelope,
-  faExclamationCircle,
-  faGraduationCap,
+  faGithub,
+  faLinkedin,
+  faTwitter
+} from '@fortawesome/free-brands-svg-icons';
+import {
+  faSun,
   faMoon,
+  faEnvelope,
   faSearch,
   faSparkles,
-  faSun
+  faExclamationCircle,
+  faGraduationCap
 } from '@fortawesome/pro-light-svg-icons';
 
-config.autoAddCss = false;
 library.add(
-  fab,
-  faMoon,
   faSun,
+  faMoon,
+  faTwitter,
+  faGithub,
+  faLinkedin,
   faEnvelope,
   faSearch,
-  faExclamationCircle,
   faSparkles,
+  faExclamationCircle,
   faGraduationCap
 );

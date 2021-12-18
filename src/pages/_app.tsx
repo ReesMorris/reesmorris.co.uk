@@ -1,20 +1,18 @@
-import React from 'react';
-import { AppProps } from 'next/app';
-import useIsTabbing from '../components/hooks/use-is-tabbing';
-import TabsProvider from '../contexts/tabs';
-import ThemeProvider from '../contexts/theme';
+import type { AppProps } from 'next/app';
+import { Fathom } from '~/components';
+import { ThemeProvider } from '~/theme';
+import { TabProvider } from '~/ui';
 import '../libs/fontawesome';
 
-const App = ({ Component, pageProps }: AppProps) => {
-  useIsTabbing();
-
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider>
-      <TabsProvider>
+      <TabProvider>
+        <Fathom />
         <Component {...pageProps} />
-      </TabsProvider>
+      </TabProvider>
     </ThemeProvider>
   );
-};
+}
 
-export default App;
+export default MyApp;

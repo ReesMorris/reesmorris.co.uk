@@ -1,18 +1,15 @@
-import React from 'react';
-import Heading from '../components/heading';
-import Page from '../components/page';
-import Text from '../components/text';
-import Wrapper from '../components/wrapper';
+import { Page } from '~/components';
+import { FontSize, ForwardLayout, Heading, Text } from '~/ui';
 
-const Index = () => {
+const NotFound = () => {
   return (
-    <Page>
-      <Wrapper>
-        <Heading>404 - Not Found</Heading>
-        <Text>Sorry, but this page doesn&apos;t exist!</Text>
-      </Wrapper>
+    <Page seo={{ canonical: 'https://reesmorris.co.uk' }}>
+      <ForwardLayout margin={{ bottom: 1 }}>
+        <Heading fontSize={FontSize.Size2}>404 - Not Found</Heading>
+      </ForwardLayout>
+      <Text>Sorry, but this page doesn&apos;t exist!</Text>
     </Page>
   );
 };
 
-export default Index;
+export default NotFound;

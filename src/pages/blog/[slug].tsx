@@ -1,14 +1,11 @@
-import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
-import { getFile, getFilesInDirectory, IFile } from '../../utils/mdx';
-import components from '../../utils/mdx/components';
-import Page from '../../components/page';
-import Wrapper from '../../components/wrapper';
-import Article from '../../components/article';
+import { getFile, MDXFile, getFilesInDirectory } from '~/utils/mdx';
+import { Page, MDXRemote } from '~/components';
+import { Typeset, Heading, Layout } from '~/ui';
+import { AuthorRow } from '~/components/pages/blog';
 
 interface BlogPostProps {
-  post: IFile;
+  post: MDXFile;
 }
 
 const BlogPost = ({ post }: BlogPostProps) => {
@@ -22,14 +19,13 @@ const BlogPost = ({ post }: BlogPostProps) => {
         emoji: '📝'
       }}
     >
-      <Wrapper>
-        <Article metadata={post.metadata}>
-          <MDXRemote
-            {...(post.source as MDXRemoteSerializeResult)}
-            components={components}
-          />
-        </Article>
-      </Wrapper>
+      <Heading>{post.metadata.title}</Heading>
+      <Layout margin={{ top: 1.5, bottom: 2 }}>
+        <AuthorRow metadata={post.metadata} />
+      </Layout>
+      <Typeset>
+        <MDXRemote source={post.source} />
+      </Typeset>
     </Page>
   );
 };
@@ -43,7 +39,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const post = await getFile('blog', `${params?.slug}.mdx`, true);
+  const post = await getFile('blog', `${params?.slug}.mdx`);
   return { props: { post } };
 };
 
