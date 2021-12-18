@@ -19,7 +19,7 @@ interface BlogProps {
   posts: MDXFile[];
 }
 
-const Blog = ({ posts }: BlogProps) => {
+export default ({ posts }: BlogProps) => {
   const [input, setInput] = useState('');
 
   // filter posts by input
@@ -87,5 +87,3 @@ export const getStaticProps: GetStaticProps = async () => {
   const posts = await getFiles('blog');
   return { props: { posts } };
 };
-
-export default Blog;

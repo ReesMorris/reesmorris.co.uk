@@ -26,6 +26,7 @@ const ScTypeset = styled.div`
   ul,
   ol,
   pre,
+  details,
   .note,
   .tabs {
     margin-bottom: ${staticThemeVar('space-2')};

@@ -1,7 +1,7 @@
 import { Page } from '~/components';
 import { FontSize, ForwardLayout, Heading, Text } from '~/ui';
 
-const NotFound = () => {
+export default () => {
   return (
     <Page seo={{ canonical: 'https://reesmorris.co.uk' }}>
       <ForwardLayout margin={{ bottom: 1 }}>
@@ -11,5 +11,3 @@ const NotFound = () => {
     </Page>
   );
 };
-
-export default NotFound;

@@ -4,7 +4,7 @@ import { ThemeProvider } from '~/theme';
 import { TabProvider } from '~/ui';
 import '../libs/fontawesome';
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default ({ Component, pageProps }: AppProps) => {
   return (
     <ThemeProvider>
       <TabProvider>
@@ -13,6 +13,4 @@ function MyApp({ Component, pageProps }: AppProps) {
       </TabProvider>
     </ThemeProvider>
   );
-}
-
-export default MyApp;
+};

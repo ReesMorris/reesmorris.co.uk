@@ -8,7 +8,7 @@ interface BlogPostProps {
   post: MDXFile;
 }
 
-const BlogPost = ({ post }: BlogPostProps) => {
+export default ({ post }: BlogPostProps) => {
   return (
     <Page
       seo={{
@@ -42,5 +42,3 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const post = await getFile('blog', `${params?.slug}.mdx`);
   return { props: { post } };
 };
-
-export default BlogPost;
