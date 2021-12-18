@@ -10,7 +10,7 @@ export interface ImageProps
 export const Image = (props: ImageProps) => {
   return (
     <ForwardLayout borderRadius={props.radius}>
-      <NextImage placeholder='blur' {...props} />
+      <NextImage {...props} />
     </ForwardLayout>
   );
 };
