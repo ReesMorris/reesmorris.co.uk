@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import rehypePrism from '@mapbox/rehype-prism';
+import rehypeSlug from 'rehype-slug';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXFile, MDXMetadata } from './types';
 
@@ -26,7 +27,7 @@ export const getFile = async (type: Type, slug: string): Promise<MDXFile> => {
 
   const source = await serialize(content, {
     mdxOptions: {
-      rehypePlugins: [rehypePrism]
+      rehypePlugins: [rehypePrism, rehypeSlug]
     }
   });
 
