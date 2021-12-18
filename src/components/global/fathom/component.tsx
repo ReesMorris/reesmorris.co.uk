@@ -7,7 +7,8 @@ export const Fathom = () => {
 
   useEffect(() => {
     FathomClient.load('GLPYEDSZ', {
-      includedDomains: ['reesmorris.co.uk']
+      includedDomains: ['reesmorris.co.uk'],
+      url: 'https://innovative-fabulous.reesmorris.co.uk/script.js'
     });
 
     const onRouteChangeComplete = () => FathomClient.trackPageview();
