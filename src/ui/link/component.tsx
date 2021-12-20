@@ -51,8 +51,8 @@ export const Link = (props: LinkProps) => {
     $colorHover: colorHover
   };
 
-  // Either an anchor link (#), begins with query parameter (?), or an internal link (/)
-  if (href.match(/#.*/) || href.match(/^\?.*/) || href.match(/^\/.*/)) {
+  // Internal link: URL begins with a /, ?, or #
+  if (href.match(/^[\/|?|#].*/)) {
     return (
       <NextLink href={href} passHref>
         <ScLink href={href} {...styleProps} {...rest}>

@@ -42,10 +42,19 @@ const ScTypeset = styled.div`
   ol {
     list-style-type: decimal;
   }
+
+  ul,
+  ol {
+    list-style-position: inside;
+  }
   li {
     &:not(:last-of-type) {
       margin-bottom: ${staticThemeVar('space-05')};
     }
+  }
+  li > ul,
+  li > ol {
+    margin-left: 20px;
   }
 
   blockquote {

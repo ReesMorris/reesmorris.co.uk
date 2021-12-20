@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const interpolateProp =
   <T extends Record<string, any>, N extends keyof T>(
     propName: N,

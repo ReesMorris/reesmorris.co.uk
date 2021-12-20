@@ -1,0 +1,677 @@
+---
+title: 'Fetching global data once and persisting it between routes with Next.js'
+date: '2021-12-20'
+summary: "There's a chance your application needs to handle global state in Next.js without relying on Redux; what's the best way to do it?"
+---
+
+Depending on your reason for using Next.js, there's a chance that you need to fetch data once (eg. from an API) when a user visits the site and then perisist it across all other routes without re-fetching it after every route change.
+
+As of the time of writing (Next.js 12), implementing this efficiently is fairly complex. Whilst there [may be a workaround](https://github.com/vercel/next.js/discussions/10874#discussioncomment-979509) for your case (including using [next-redux-wrapper](https://github.com/kirill-konshin/next-redux-wrapper) if using Redux), until a resolution is made on [this GitHub discussion](https://github.com/vercel/next.js/discussions/10874) it's likely that you've hit the same wall as me: my Next.js application is used as a frontend for a SaaS CMS where the cricial data can be changed at any time, but I only want to fetch it once per visit.
+
+## What is "critical" data?
+
+Before jumping in, it's important to clarify what I mean by "critical data". The implementation we'll be using will force us to define an `App.getInitialProps` method, meaning Next.js will lose the ability to perform automatic static optimization across the site. As such, we should _only_ do this in cases where we truly need it.
+
+I would define critical data as matching _all_ of the following points:
+
+- Cannot be included with the frontend codebase (fetched externally from an API endpoint, storage bucket, etc)
+- Contains information required to render the intial layout (website title, navigation/footer links, custom theme, SEO tags, etc)
+- Changes on a frequent basis, or changes infrequently but it would be _more_ resource intensive to re-build and deploy the frontend after a change (eg. the frontend is part of a SaaS backend where you would have to deploy to more than one place)
+- Does not change as a result of external factors such as auth state (while the frontend _may_ render conditionally based on this data, the data itself should not change)
+- Can be accessed by any visitor (does not require authentication)
+
+This is definitely not an exhaustive list and there can be edge cases, though if your feature does not meet the criteria above I would definitely re-consider whether you need to sacrifice static optimisation for it; there's a high chance that loading that feature on the client side won't have any major implications on the site.
+
+If your feature _does_ meet all of the above, then I completely understand any frustration. Let's look into making this as efficient and optimal as possible.
+
+## Implementation
+
+As mentioned above, the implementation for this is far from trivial. It involves handling state with context providers, storing that state inside a `window` object for the client, and storing that state in-memory on the server. It might feel like we're re-implementing Redux but with providers. This implementation is the result of a weekend of planning, and may still be far from optimal.
+
+For brevity, I'm going to assume that you're already running a Next.js application with some external data that you're fetching.
+
+The guide will attempt to mimic a real-world scenario by attempting to fetch data from a `/navigation` API endpoint, but it's mostly just a placeholder for your own code. You also aren't limited to just one API endpoint (or even limited to using APIs!).
+
+### Fetching the data
+
+The first step is to ensure that you have a [Custom `App`](https://nextjs.org/docs/advanced-features/custom-app) set up. This is where we'll fetch our global data from so that it can be accessed everywhere.
+
+Next, let's create a wrapper function that will return an object of our global state:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+<TabPanel>
+
+<TabContent>
+
+First, create the function to fetch and return all of this:
+
+```javascript
+// actions/get-global-state.js
+import { getNavigation } from './get-navigation';
+
+export const getGlobalState = async () => {
+  const navigation = await getNavigation(); // 👈 this is your outbound data request
+  // const footer = await getFooter(); 👈 you can have as many as you need!
+
+  return { navigation };
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
+
+First, declare a `GlobalState` interface:
+
+```typescript
+// models/global-state.ts
+import { Navigation } from './navigation';
+
+export interface GlobalState {
+  navigation?: Navigation[] | null; // 👈 this is one of your global objects
+  // footer?: Footer | null; 👈 you can have as many as you need!
+}
+```
+
+Next, create the function to fetch and return all of this:
+
+```typescript
+// actions/get-global-state.ts
+import { GlobalState } from '../models/global-state';
+import { getNavigation } from './get-navigation';
+
+export const getGlobalState = async (): Promise<GlobalState> => {
+  const navigation = await getNavigation(); // 👈 this is your outbound data request
+  // const footer = await getFooter(); 👈 you can have as many as you need!
+
+  return { navigation };
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+</TabList>
+
+Next, we'll want to call this within `App.getInitialProps`:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+<TabPanel>
+
+<TabContent>
+
+```jsx
+// _app.jsx
+MyApp.getInitialProps = async appContext => {
+  const globalState = await getGlobalState(); // 👈 pull the global state
+
+  const appProps = await App.getInitialProps(appContext); // 👈 everything else goes AFTER!
+  return { ...appProps, globalState }; // 👈 make sure to return it as well
+};
+```
+
+We'll also need to pull the new variable through `MyApp`:
+
+```javascript
+// _app.jsx
+const MyApp = ({ Component, pageProps, globalState }) => {
+  // ...
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
+
+```tsx
+// _app.tsx
+MyApp.getInitialProps = async (appContext: AppContext) => {
+  const globalState = await getGlobalState(); // 👈 pull the global state
+
+  const appProps = await App.getInitialProps(appContext); // 👈 everything else goes AFTER!
+  return { ...appProps, globalState }; // 👈 make sure to return it as well
+};
+```
+
+We'll also need to extend the `AppProps` to support the new `globalState`, and pull the new variable through:
+
+```typescript
+// _app.tsx
+interface ExtendedAppProps extends AppProps {
+  globalState: GlobalState;
+}
+
+const MyApp = ({ Component, pageProps, globalState }: ExtendedAppProps) => {
+  // ...
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+</TabList>
+
+### Creating a provider
+
+Now that we have the data, we can create a global provider for it all.
+
+We could also create one provider for each item, but it leaves a possibility that you'll forget to add the cache if adding a new global item a few months down the line. I'd recommend following this route and then making a decision afterwards!
+
+Let's create a `GlobalProvider`:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+<TabPanel>
+
+<TabContent>
+
+```jsx
+// providers/global.jsx
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+const GlobalContext = createContext({
+  navigation: null, // 👈 this should match your global state
+  // footer: null 👈 and repeat for every item!
+  setGlobal: () => null
+});
+
+export const GlobalProvider = ({ data, children }) => {
+  const [state, setState] = useState(data);
+
+  const setGlobal = data => {
+    setState({ ...data });
+  };
+
+  return (
+    <GlobalContext.Provider value={{ ...state, setGlobal }}>
+      {children}
+    </GlobalContext.Provider>
+  );
+};
+
+export const useGlobal = () => useContext(GlobalContext);
+```
+
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
+
+```tsx
+// providers/global.tsx
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { GlobalState } from '../models/global-state';
+
+interface GlobalProviderProps {
+  data: GlobalState;
+  children: React.ReactNode;
+}
+
+interface GlobalContext extends GlobalState {
+  setGlobal: (data: GlobalState) => void;
+}
+
+const GlobalContext = createContext<GlobalContext>({
+  navigation: null, // 👈 this should match your global state
+  // footer: null 👈 and repeat for every item!
+  setGlobal: () => null
+});
+
+export const GlobalProvider = ({ data, children }: GlobalProviderProps) => {
+  const [state, setState] = useState(data);
+
+  const setGlobal = (data: GlobalState) => {
+    setState({ ...data });
+  };
+
+  return (
+    <GlobalContext.Provider value={{ ...state, setGlobal }}>
+      {children}
+    </GlobalContext.Provider>
+  );
+};
+
+export const useGlobal = () => useContext(GlobalContext);
+```
+
+</TabContent>
+
+</TabPanel>
+
+</TabList>
+
+Finally, let's hook this up to our `App` component:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+<TabPanel>
+
+<TabContent>
+
+```jsx
+// pages/_app.jsx
+return (
+  <GlobalProvider data={globalState}>
+    <Component {...pageProps} />
+  </GlobalProvider>
+);
+```
+
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
+
+```tsx
+// pages/_app.tsx
+return (
+  <GlobalProvider data={globalState}>
+    <Component {...pageProps} />
+  </GlobalProvider>
+);
+```
+
+</TabContent>
+
+</TabPanel>
+
+</TabList>
+
+This works fine, until we navigate to a different page. Our `App.getInitialProps` is forcing the re-request of all our global data once again. Let's cache that.
+
+### Caching on the client side
+
+The goal here is to store the data our provider receives in a `window` variable on the client side, which our `App.getInitialProps` can refer to instead of fetching the data again.
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+<TabPanel>
+
+<TabContent>
+
+Let's start by adding a tiny util function:
+
+```javascript
+// utils/is-browser.js
+export const isBrowser = typeof window !== 'undefined';
+```
+
+Next, let's create some helper utils for our client state:
+
+```javascript
+// utils/global-state/global-state-client.js
+import { isBrowser } from '../is-browser';
+
+export const GLOBAL_WINDOW = '__GLOBAL_DATA__';
+
+// Set or update the cache
+export const setGlobalStateClient = data => {
+  if (isBrowser) window[GLOBAL_WINDOW] = data;
+};
+
+// Return the cache
+export const getGlobalStateClient = () => {
+  return isBrowser ? window[GLOBAL_WINDOW] : undefined;
+};
+```
+
+Inside of our `GlobalProvider`, let's add a _useEffect_ call to update this whenever our state changes. (If you've gone for a multi-provider approach, you'll need to add this to every global provider):
+
+```javascript
+// providers/global.js
+useEffect(() => {
+  setGlobalStateClient(state);
+}, [state]);
+```
+
+Let's create another util that will return the cached state:
+
+```javascript
+// utils/global-state/get-cached-state.js
+import { getGlobalStateClient } from './global-state-client';
+
+export const getCachedState = field => {
+  // Client cache
+  const client = getGlobalStateClient();
+  if (client && client[field]) return client[field];
+
+  // Server cache
+  // TODO
+
+  return undefined;
+};
+```
+
+Lastly, for every item in our `getGlobalState` function, let's check the cache beforehand. As an example, here's how the `getNavigation` function might look:
+
+```javascript
+// actions/get-navigation.js
+export const getNavigation = async () => {
+  // Try the global cache
+  const cache = getCachedState('navigation'); // 👈
+  if (cache) return Promise.resolve(cache); // 👈
+
+  // Not in the cache, fetch from API
+  const data = await HTTPRequest(/* ... */);
+  return Promise.resolve(data);
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
+
+Let's start by adding a tiny util function:
+
+```typescript
+// utils/is-browser.ts
+export const isBrowser = typeof window !== 'undefined';
+```
+
+Next, let's create some helper utils for our client state:
+
+```typescript
+// utils/global-state/global-state-client.ts
+import { GlobalState } from '../../models/global-state';
+import { isBrowser } from '../is-browser';
+
+export const GLOBAL_WINDOW = '__GLOBAL_DATA__';
+
+// Set or update the cache
+export const setGlobalStateClient = (data: GlobalState) => {
+  if (isBrowser) window[GLOBAL_WINDOW] = data;
+};
+
+// Return the cache
+export const getGlobalStateClient = () => {
+  return isBrowser ? window[GLOBAL_WINDOW] : undefined;
+};
+```
+
+We'll also add a type declaration for our new `window` field:
+
+```typescript
+// types/window.d.ts
+import { GlobalState } from '../models/global-state';
+import { GLOBAL_WINDOW } from '../utils/global-state/global-state-client';
+
+declare global {
+  interface Window {
+    [GLOBAL_WINDOW]?: GlobalState;
+  }
+}
+```
+
+Inside of our `GlobalProvider`, let's add a _useEffect_ call to update this whenever our state changes. (If you've gone for a multi-provider approach, you'll need to add this to every global provider):
+
+```typescript
+// providers/global.ts
+useEffect(() => {
+  setGlobalStateClient(state);
+}, [state]);
+```
+
+Let's create another util that will return the cached state:
+
+```typescript
+// utils/global-state/get-cached-state.ts
+import { GlobalState } from '../../models/global-state';
+import { getGlobalStateClient } from './global-state-client';
+
+export const getCachedState = (field: keyof GlobalState) => {
+  // Client cache
+  const client = getGlobalStateClient();
+  if (client && client[field]) return client[field];
+
+  // Server cache
+  // TODO
+
+  return undefined;
+};
+```
+
+Lastly, for every item in our `getGlobalState` function, let's check the cache beforehand. As an example, here's how the `getNavigation` function might look:
+
+```typescript
+// actions/get-navigation.ts
+export const getNavigation = async (): Promise<Navigation> => {
+  // Try the global cache
+  const cache = getCachedState('navigation'); // 👈
+  if (cache) return Promise.resolve(cache); // 👈
+
+  // Not in the cache, fetch from API
+  const data = await HTTPRequest(/* ... */);
+  return Promise.resolve(data);
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+</TabList>
+
+Typing `__GLOBAL_DATA__` into the browser console should now show the contents of your client-side cache. Whenever the provider data is updated, the cache should be updated too.
+
+Looking at the network tab when navigating between routes on the app should also no longer trigger any further network requests. Even moreso, if a page you navigate to calls one of these cached entities within its `getInitialProps`, that too will use the cache!
+
+Whilst we do have the option to update the provider's value, we don't really need to worry too much about revalidating the cache on the client, since most users would expect data to remain unchanged until they refresh the page.
+
+### Caching on the server side
+
+Unlike our client side cache, it's imperative that we invalidate our server's in-memory data after a certain amount of time, otherwise any changes to our external data will only be seen once the frontend has been re-deployed (making this entire exercise somewhat useless).
+
+It's also very critical to note that we should only cache data in memory that is completely publicly available: no private user data, conditional data, or authorised data should be cached in memory as that can open up massive security risks. The best way to think of it is: can a user in an incognito tab see the exact same response as an admin who is signed in? If so, we're fine to go ahead and add some in-memory caching for this data.
+
+We'll be writing our server caching slightly differently to ensure that caching is set on a per-item basis. You may even want to adapt this to our client-side caching!
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+<TabPanel>
+
+<TabContent>
+
+Let's write some logic to store our in-memory cache:
+
+```javascript
+// utils/global-state/global-state-server.js
+import { isBrowser } from '../is-browser';
+
+let cache = {};
+
+// Set or update the cache
+export const setGlobalStateServer = (field, data, expireSeconds) => {
+  if (!isBrowser && expireSeconds) {
+    const expires = new Date();
+    expires.setSeconds(expires.getSeconds() + expireSeconds);
+    cache[field] = { expires, data };
+  }
+};
+
+// Return the cache
+export const getGlobalStateServer = () => {
+  return !isBrowser ? cache : undefined;
+};
+```
+
+Unlike the client-equivalent, our `setGlobalStateServer` function requires us to provide the field name so that we can only update one field at a time. This allows us to set cache specific to each data item. If no cache expiry is set, it won't be cached in memory.
+
+Let's update our `getCachedState` function to handle this:
+
+```javascript
+// utils/global-state/get-cached-state.js
+import { getGlobalStateClient } from './global-state-client';
+import { getGlobalStateServer } from './global-state-server';
+
+export const getCachedState = field => {
+  // Client cache
+  const client = getGlobalStateClient();
+  if (client && client[field]) return client[field];
+
+  // Server cache
+  const server = getGlobalStateServer();
+  if (server && server[field]) {
+    if (new Date() < server[field].expires) {
+      return server[field].data;
+    }
+  }
+
+  return undefined;
+};
+```
+
+If the cache exists and _hasn't_ expired, it will be returned. Otherwise, we'll return `undefined` to force a re-request of the data.
+
+The very last step is to actually cache the data. In each of your global functions that should be cached, add the data. As an example, here's how the `getNavigation` function might look:
+
+```javascript
+// actions/get-navigation.js
+export const getNavigation = async () => {
+  // Try the global cache
+  const cache = getCachedState('navigation'); // 👈
+  if (cache) return Promise.resolve(cache); // 👈
+
+  // Not in the cache, fetch from API
+  const data = await HTTPRequest(/* ... */);
+  return Promise.resolve(data);
+
+  // Cache the result 60 seconds
+  if (data) setGlobalStateServer('navigation', data, 60);
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+<TabPanel>
+
+<TabContent>
+
+Let's declare a new type that will allow us to specify cache expiry:
+
+```typescript
+// models/global-state.ts
+export interface GlobalStateItem<T extends keyof GlobalState> {
+  expires: Date;
+  data?: GlobalState[T] | null;
+}
+```
+
+Next, let's write some logic to store our in-memory cache:
+
+```typescript
+// utils/global-state/global-state-server.ts
+import { GlobalState, GlobalStateItem } from '../../models/global-state';
+import { isBrowser } from '../is-browser';
+
+export type Cache = {
+  [T in keyof GlobalState]: GlobalStateItem<T>;
+};
+
+let cache: Cache = {};
+
+// Set or update the cache
+export const setGlobalStateServer = <
+  T extends keyof GlobalState,
+  R extends GlobalState[T]
+>(
+  field: T,
+  data: R,
+  expireSeconds?: number
+): void => {
+  if (!isBrowser && expireSeconds) {
+    const expires = new Date();
+    expires.setSeconds(expires.getSeconds() + expireSeconds);
+    cache[field] = { expires, data };
+  }
+};
+
+// Return the cache
+export const getGlobalStateServer = () => {
+  return !isBrowser ? cache : undefined;
+};
+```
+
+Unlike the client-equivalent, our `setGlobalStateServer` function requires us to provide the field name so that we can only update one field at a time. This allows us to set cache specific to each data item. If no cache expiry is set, it won't be cached in memory.
+
+Let's update our `getCachedState` function to handle this:
+
+```typescript
+// utils/global-state/get-cached-state.ts
+import { GlobalState, GlobalStateItem } from '../../models/global-state';
+import { getGlobalStateClient } from './global-state-client';
+import { getGlobalStateServer } from './global-state-server';
+
+export const getCachedState = <T extends keyof GlobalState>(field: T) => {
+  // Client cache
+  const client = getGlobalStateClient();
+  if (client && client[field]) return client[field];
+
+  // Server cache
+  const server = getGlobalStateServer();
+  if (server && server[field]) {
+    if (new Date() < (server[field] as GlobalStateItem<T>).expires) {
+      return (server[field] as GlobalStateItem<T>).data;
+    }
+  }
+
+  return undefined;
+};
+```
+
+If the cache exists and _hasn't_ expired, it will be returned. Otherwise, we'll return `undefined` to force a re-request of the data.
+
+The very last step is to actually cache the data. In each of your global functions that should be cached, add the data. As an example, here's how the `getNavigation` function might look:
+
+```typescript
+// actions/get-navigation.ts
+export const getNavigation = async (): Promise<Navigation> => {
+  // Try the global cache
+  const cache = getCachedState('navigation'); // 👈
+  if (cache) return Promise.resolve(cache); // 👈
+
+  // Not in the cache, fetch from API
+  const data = await HTTPRequest(/* ... */);
+  return Promise.resolve(data);
+
+  // Cache the result 60 seconds
+  if (data) setGlobalStateServer('navigation', data, 60);
+};
+```
+
+</TabContent>
+
+</TabPanel>
+
+</TabList>
+
+## Conclusion
+
+And.. that's it! I really wasn't kidding when I mentioned this being a complex process, and I really hope the Vercel team add in some out-of-the-box support for this in an upcoming major release.
+
+In the meantime, unless someone wants to convert this into an open source plugin, this really seems the best way to me.
+
+PS. I'd like to give a special thanks to [Markel Arizaga](https://stackoverflow.com/questions/57759562/how-to-fetch-data-only-once-in-a-next-js-app-and-make-it-accesible-to-all-the-ap/62555617#62555617) and [Nick Mazuk](https://stackoverflow.com/questions/66106408/retrieve-data-server-side-and-save-in-context-with-next-js/66295338#66295338) for their responses on some of the Stack Overflow threads I investigated before starting on this journey.
