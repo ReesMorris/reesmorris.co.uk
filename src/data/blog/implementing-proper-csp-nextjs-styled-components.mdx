@@ -20,7 +20,7 @@ The purpose of the Content Security Policy is to add a layer of protection betwe
 
 In short, CSP essentially forces you to 'whitelist' the origins that resources on your site (such as scripts, styles, fonts, images, etc.) can load from. If a resource is being requested from an origin that _isn't_ on the whitelist, it will be blocked by the browser. This makes CSP an excellent layer of defence against XSS and data injection attacks.
 
-CSP is typically added to a site in one of two ways: either as a HTTP header returned by the web server, or as a _meta_ tag element embedded within the head. Whilst the HTTP header is more common, it mostly depends on your setup: some applications (such as completely static sites) don't have any server-side rendering (SSR), so will need to rely on the meta tag instead. Both are just as valid!
+CSP is typically added to a site in one of two ways: either as a HTTP header returned by the web server, or as a _meta_ tag element embedded within the head. Whilst the HTTP header is more common, it mostly depends on your setup: some applications (such as completely static sites) don't have any server-side rendering, so will need to rely on the meta tag instead. Both are just as valid!
 
 ## CSP Syntax
 
@@ -68,8 +68,8 @@ content-security-policy:
   default-src 'self';
 ```
 
-- the `font-src` directive is using the [`'self'` keyword](https://content-security-policy.com/self), which allows fonts hosted on the same origin to be loaded, as well as fonts from any subdomain on `twimg.com`
-- the `img-src` directive also uses the `'self'` keyword, allowing images hosted on the same origin to load, as well as any `blob:` and `data:`URIs ([arguably insecure](https://www.w3.org/TR/CSP3/#csp-directives)), and any images loaded on a subdomain of `cdn.twitter.com` or on `ton.twitter.com`
+- the `font-src` directive is using the [`'self'` keyword](https://content-security-policy.com/self); which allows fonts hosted on the same origin to be loaded, as well as fonts from any subdomain on `twimg.com`
+- the `img-src` directive also uses the `'self'` keyword; allowing images hosted on the same origin to load, as well as any `blob:` and `data:`URIs ([arguably insecure](https://www.w3.org/TR/CSP3/#csp-directives)), and any images loaded on a subdomain of `cdn.twitter.com` or on `ton.twitter.com`
 - the `object-src` directive is using the [`'none'` keyword](https://content-security-policy.com/none) which means that _anything_ using this directive will be blocked; there is no allowed implementation
 - the `script-src` directive also uses the `'self'` keyword, allowing scripts hosted on the same origin to load, as well as the [`nonce-` keyword](https://content-security-policy.com/nonce), which holds a random, cryptographically secure token that can be attached to inline elements (scripts, in this case); we'll learn much more about this later
 - the `default-src` directive is also set to `self`; we'll learn more about this in just a moment
@@ -342,7 +342,7 @@ The first option is to use the [`'unsafe-inline'` keyword](https://content-secur
 
 The second option is to generate a sha256 hash of our inline styles and pass the hash as one of the values for our `style-src` directive. This could work in theory, but if you're using _any_ form of CSS-in-JS solution, just one piece of conditional rendering logic (eg. a user clicks a button, changing a colour) would break this; when the CSS of the inline style changes, it wouldn't match the hash anymore.
 
-The third option is likely our best bet, a [nonce value](https://content-security-policy.com/nonce). A nonce is a randomly generated token used only once (Number Only used oNCE). The theory is that our server will generate this random token when the user visits the site, attach the nonce as a value to our `style-src` directive, and also pass the value to Next.js to attach it as a `nonce=''` attribute on our inline styles.
+The third option is likely our best bet, a [nonce value](https://content-security-policy.com/nonce). A nonce is a randomly generated token used only once (Number Only used oNCE). The theory is that our server will generate this random token when the user visits the site, attach the nonce as a value to our `style-src` directive, and also pass the value to Next.js to attach it as a `nonce=''` attribute on our style tags.
 
 This is where this post diverges depending on your infrastructure. In order to generate a nonce value, we _need_ our site to be behind a server. More specifically, we need _every page_ on our site to be server-side rendered at runtime by having `getInitialProps()` in a [custom `_app`](https://nextjs.org/docs/advanced-features/custom-app). This likely isn't possible if you have any kind of static site, such as this one.
 
