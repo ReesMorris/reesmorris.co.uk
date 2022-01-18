@@ -354,6 +354,8 @@ If you don't have a custom `_app` with `getInitialProps` set up, you'll need to 
 
 So long as we're talking exclusively about using `'unsafe-inline'` in the context of styling and _never_ for scripts, _my opinion_ is that you should be fine. If your Content Security Policy is strong for all other directives (eg. `img-src`), there is very little that CSS-based XSS attacks can achieve.
 
+If your site _does_ allow user input, it should go without saying that sanitising HTML to prevent custom `<style>` tags or inline `style` attributes before storing/rendering it is crucial in mitigating even the least dangerous forms of attack.
+
 ```javascript
 // style-src
 add('style-src', `'unsafe-inline'`);
@@ -361,7 +363,7 @@ add('style-src', `'unsafe-inline'`);
 
 For further relief (at the time of writing), both [Twitter's report](https://observatory.mozilla.org/analyze/twitter.com) and [Spotify's report](https://observatory.mozilla.org/analyze/spotify.com) on Mozilla Observatory both include `'unsafe-inline'` for styling, but their overall scores couldn't be higher. We're always limited in some way by the architecture we choose, though it's clear that achieving a top-grade security score is doable regardless of how you're using Next.js.
 
-_Again, I am by no means a security expert so do conduct additional research if this is very important for you._
+_Again, I am by no means a security expert so do conduct additional research if this is very important for you. Read on for information on using a nonce rather than `'unsafe-inline'`._
 
 <Note type='info' icon={{ name: 'graduation-cap' }}>
 
