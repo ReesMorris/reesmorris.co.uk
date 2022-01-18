@@ -377,7 +377,7 @@ You may have noticed the same error as for inline styles. The one difference her
 
 Instead, let's create a helper function that will hash our inline scripts.
 
-Note that you'll _only_ need this for inline scripts; if you have any `<script>` tags with a `src` attribute, you won't need to hash those -but will need to allow their origins in your CSP. If you have any scripts of `type="application/json"`, they also won't need hashing as the browser doesn't evaluate those.
+Note that you'll _only_ need this for inline scripts; if you have any `<script>` tags with a `src` attribute, you won't need to hash those - but will need to allow their origins in your CSP. If you have any scripts of `type="application/json"`, they also won't need hashing as the browser doesn't evaluate those.
 
 <TabList tabs={['JavaScript', 'TypeScript']}>
 
@@ -500,7 +500,7 @@ The only caveat is that the content of your inline script _can't_ change whilst 
 
 <Note type='info' icon={{ name: 'sparkles' }}>
 
-If your site isn't completely server-side rendered, the next few sections won't be relevant - but feel free to follow for the theory!
+If your site isn't completely server-side rendered, the next section won't be relevant - but feel free to follow for the theory, or skip to the [bonus items](#bonus-google-fonts)!
 
 </Note>
 
