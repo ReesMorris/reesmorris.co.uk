@@ -45,7 +45,8 @@ const ScTypeset = styled.div`
 
   ul,
   ol {
-    list-style-position: inside;
+    margin-left: 17px;
+    list-style-position: outside;
   }
   li {
     &:not(:last-of-type) {
@@ -82,7 +83,8 @@ const ScTypeset = styled.div`
     padding: ${staticThemeVar('space-05')};
   }
 
-  & > pre {
+  & > pre,
+  .tabcontent pre {
     margin-left: calc(${staticThemeVar('space-2')} * -1);
     margin-right: calc(${staticThemeVar('space-2')} * -1);
   }
@@ -93,6 +95,10 @@ const ScTypeset = styled.div`
     padding: ${staticThemeVar('space-15')};
     overflow-x: auto;
     border-radius: ${staticThemeVar('border-radius-medium')};
+
+    + .tabcontent {
+      padding-top: 0;
+    }
 
     .keyword {
       color: ${themeVar('color-code-keyword')};

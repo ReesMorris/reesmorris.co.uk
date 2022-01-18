@@ -1,8 +1,10 @@
 import styled from '@emotion/styled';
 import { staticThemeVar } from '~/theme';
+import { cn } from '../../utils';
 
 export interface TabContentProps extends React.HTMLAttributes<HTMLDivElement> {
   children?: React.ReactNode;
+  className?: string;
 }
 
 const ScTabContent = styled.div`
@@ -10,6 +12,10 @@ const ScTabContent = styled.div`
 `;
 
 export const TabContent = (props: TabContentProps) => {
-  const { children, ...rest } = props;
-  return <ScTabContent {...rest}>{children}</ScTabContent>;
+  const { children, className, ...rest } = props;
+  return (
+    <ScTabContent {...rest} className={cn('tabcontent', className)}>
+      {children}
+    </ScTabContent>
+  );
 };

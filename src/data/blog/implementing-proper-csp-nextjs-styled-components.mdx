@@ -4,377 +4,653 @@ date: '2021-04-23'
 summary: "CSPs add a great layer of protection to websites, but implementing them can be tricky. Let's break down everything you need to know."
 ---
 
-A few weeks ago, I was tasked with optimising our Next.js frontend to achieve the best possible [Mozilla Observatory](https://observatory.mozilla.org) grade.
+_Update Jan 2022: Due to the popularity this article seems to have gathered, I've re-written huge parts of it to make it even more informative._
 
-At the time, we were receiving the worst possible rating on the site; our frontend didn't have any of the recommended security headers in place, and frankly it was the first time I'd even heard of most of them.
+## Introduction
 
-For most of the required headers, the Observatory provides a fairly detailed guide on what header to set and what value it should have. Despite this, there was one header in particular which _really_ proved to be a challenge for our setup...
+This post aims to discuss the best ways to implement a secure and scalable Content Security Policy on a website, along with some theory as to just what a Content Security Policy (CSP) actually is. We'll be using [Next.js](https://nextjs.org) and [styled-components](https://styled-components.com) for the code here, though the theory should be easily transferable to any other library.
 
-## Content Security Policy
+Depending on the architecture of your site, you may not be able to implement a _wholly_ complete Content Security Policy (eg. certain aspects require you to be running a web server). As such, the first few sections of this post should apply to virtually any website, and it's strongly encouraged to have at least a baseline policy in place.
 
-The purpose of the Content Security Policy (CSP) header is to add an additional layer of protection between a website and browser by blocking or limiting specific [directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#fetch_directives) on a website - primarily focused on limiting the origin of external resources (scripts, styles, fonts, etc.).
+Before we begin, I must emphasise that _I am not a security expert_; I'm just a frontend developer who was tasked with implementing this a few months back and am sharing everything I learned here. The ideas and suggestions below are things found on my own journey using the scarce amount of internet resources on the topic, so don't assume this is the only / the best way to approach CSP!
 
-For instance, you might only want images and fonts to be loaded if their URL origin is from the same website, or from a pre-defined domain (such as a CDN): or even both. CSP esentially forces you to 'whitelist' those resource origins, with the goal of mitigating the possible damage from any malicious attacks.
+## Content Security What?
 
-The main issue for websites running CSS-in-JS solutions like [styled-components](https://styled-components.com/) is that CSP _strongly discourages_ inline styling due to the XSS risks it can pose, to a point where you would need to explicitly declare your styling as `'unsafe-inline'` just for the browser to render it. Of course, we could simply stick with that and call it a day - but at that point (as the name suggests) we're essentially cheating on our own test just to get a better grade. There's a [paper on it](https://research.google/pubs/pub45542/) too, if you're interested to learn more.
+The purpose of the Content Security Policy is to add a layer of protection between a website and browser by blocking specific [directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#directives) that don't align with your policy.
 
-In this post, I'm going to break down and showcase and most secure way to implement a CSP on a website running Next.js and styled-components. This is a follow-along guide, so do feel free to get stuck in!
+In short, CSP essentially forces you to 'whitelist' the origins that resources on your site (such as scripts, styles, fonts, images, etc.) can load from. If a resource is being requested from an origin that _isn't_ on the whitelist, it will be blocked by the browser. This makes CSP an excellent layer of defence against XSS and data injection attacks.
 
-<Note type='info' icon={{ name: 'sparkles' }}>
+CSP is typically added to a site in one of two ways: either as a HTTP header returned by the web server, or as a _meta_ tag element embedded within the head. Whilst the HTTP header is more common, it mostly depends on your setup: some applications (such as completely static sites) don't have any server-side rendering (SSR), so will need to rely on the meta tag instead. Both are just as valid!
 
-If you are using the built-in [styled-jsx](https://github.com/vercel/styled-jsx) library with Next.js, you may not need this guide! There's a fairly well hidden [example repo](https://github.com/vercel/next.js/tree/canary/examples/with-strict-csp) which can solve this in just a few lines of code.
+## CSP Syntax
 
-</Note>
+The syntax of a Content Security Policy looks like the following:
 
-## Setup
+<TabList tabs={['HTTP Header', 'Meta Element']}>
 
-I'm going to assume that you already have a Next.js application running with styled-components set up. If not, but you still want in, I've created a ['follow-along' branch](https://github.com/ReesMorris/nextjs-styled-components-csp/tree/follow-along) with everything you'll need to get started.
-
-<Note type='info' icon={{ name: 'exclamation-circle' }}>
-
-One of the major caveats of implementing a proper CSP header with Next.js and styled-components is that **[automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization) must be disabled across the application**. This is because we will need to generate a [nonce](https://content-security-policy.com/nonce/) on the server to be read via the `ctx.res` property on a custom [document](https://nextjs.org/docs/advanced-features/custom-document) page, which is not possible for pages that are prerendered (see the [caveats](https://nextjs.org/docs/advanced-features/automatic-static-optimization#caveats) on static optimisation).
-
-If this is a deal breaker for your application (ie. if you are running a completely prerendered blog or are strongly against disabling static optimisation across the entire site), your only solution will be to use the `'unsafe-inline'` value in your CSP header:
-
-```typescript
-style-src 'unsafe-inline'
-```
-
-If your website _is_ completely static, it's likely you [won't even need CSP anyway](https://csp.withgoogle.com/docs/why-csp.html).
-
-</Note>
-
-Once automatic static optimisation has been disabled for your project (see the [Next.js docs](https://nextjs.org/docs/advanced-features/custom-app) for the easiest way to do this), you will be able to proceed with this guide.
-
-This guide provides code examples for websites running solely on Next.js, and websites that also have a custom Node.js server set up as well. If you're using the follow-along repo, you'll want to use the "With Express" option.
-
-### 1. Understanding CSP
-
-A typical CSP header looks like this:
+  <TabPanel>
 
 ```
 Content-Security-Policy: <directive> <values>; <directive> <values>;
 ```
 
-As mentioned above, there are a variety of [directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#fetch_directives) and [values](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#keyword_values) that allow you to fine-tune the policies of how different aspects of your website behave (images, fonts, scripts, etc.).
+  </TabPanel>
 
-The main directive is `default-src`, which acts as the fallback if a more specific directive is missing. For instance, assuming a CSP header is present and the browser wants to check your site's policy on what images should be loaded, it will look for the `img-src` directive first. If the directive isn't present, the browser will fall back to using the values of `default-src` instead.
+  <TabPanel>
 
-Due to this, a good rule of thumb is to start with _only_ this directive, and expand your policy outwards until the website returns to its normal behaviour. We'll be assigning the directive the value of `'none'` (notice the single quotes around the string), which block _all_ [fetch directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#fetch_directives) from running. There's a bit more information on what 'none' represents [here](https://content-security-policy.com/none/).
-
-<TabList tabs={['With Express', 'Without Express']}>
-  
-<TabPanel>
-
-<TabContent>
-
-You'll firstly want to create a middleware function in your Express server that intercepts all requests and returns the CSP header with the `default-src` directive set to `'none'`:
-
-```typescript
-server.use((_req: Request, res: Response, next: NextFunction) => {
-  res.setHeader('Content-Security-Policy', `default-src 'none';`);
-  next();
-});
+```html
+<meta
+  http-equiv="Content-Security-Policy"
+  content="<directive> <values>; <directive> <values>"
+/>
 ```
 
-Any time you make changes to the server (if you aren't using a tool like [nodemon](https://www.npmjs.com/package/nodemon)) you'll need to restart it completely for the changes to take effect.
-
-</TabContent>
-
-</TabPanel>
-
-<TabPanel>
-
-<TabContent>
-
-Inside of your `pages/_document` file, you'll want to return the CSP header inside the `getInitialProps` method with the `default-src` directive set to `'none'`:
-
-```tsx
-ctx.res.setHeader('Content-Security-Policy', `default-src 'none';`);
-```
-
-</TabContent>
-
-</TabPanel>
-</TabList>
-
-You should notice that all of the styling has disappeared, and any JavaScript code (such as button events or navigating between pages on the client side) has stopped working.
-
-### 2. Breaking down CSP Errors
-
-Taking a look at the console, there are various warnings all related to the CSP header we just put in place. The first error in my case is related to styled-components. The error message may vary depending on your browser, though mine (Chrome) states:
-
-> Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".
->
-> Either the 'unsafe-inline' keyword, a hash ('sha256-8rBi2tfimEXn67OXb9Bu+mEGs0onxPhYkouodSo3CLc='), or a nonce ('nonce-...') is required to enable inline execution. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.
-
-Let's break down what this message is telling us. The first sentence is our browser's way of explaining that it is refusing to render the inline styling on one of our DOM elements because inline styling isn't specifically allowed by our CSP.
-
-The next sentence explains how we can resolve this, either by adding an `'unsafe-inline'` value to the CSP header, or by adding a `sha256` / `nonce` attribute to our DOM elements. In order for inline styles to be rendered, we _must_ implement one of these three strategies.
-
-The final sentence simply explains that the browser first tried using the `style-src` directive (which is responsible for handling styling policies), but had to fall back to our `default-src` directive as `style-src` wasn't present in our CSP header.
-
-You might also see quite a few errors grouped together, with the message:
-
-> Refused to load the script '&lt;URL&gt;' because it violates the following Content Security Policy directive: "default-src 'none'". Note that 'script-src-elem' was not explicitly set, so 'default-src' is used as a fallback.
-
-This error is the reason our JavaScript code isn't working: the browser is expecting the `script-src-elem` directive to list the URL origin of our code (localhost), but our CSP is missing this.
-
-You may see a few other errors as well, related to other missing directives, but we'll turn our attention to fixing the blocked JavaScript code first.
-
-Based on the error, we'll want to update our CSP to also return a `script-src-elem` directive. Because the JavaScript is on the same origin as our website (both on localhost), we can simply use the `'self'` value here. This will allow any scripts hosted on the same origin to execute, so we don't need to worry about updating our CSP when we deploy to a live domain.
-
-<TabList tabs={['With Express', 'Without Express']}>
-
-<TabPanel>
-
-<TabContent>
-
-```typescript
-res.setHeader(
-  'Content-Security-Policy',
-  `default-src 'none'; script-src 'self';`
-);
-```
-
-</TabContent>
-
-</TabPanel>
-
-<TabPanel>
-
-<TabContent>
-
-```typescript
-ctx.res.setHeader(
-  'Content-Security-Policy',
-  `default-src 'none'; script-src 'self';`
-);
-```
-
-</TabContent>
-
-</TabPanel>
+  </TabPanel>
 
 </TabList>
 
-You may notice that the JavaScript is still not working after implementing this, but the error messages have now changed:
+Within the syntax, we have _directives_ and _values_. The directive is declared first, and then its value(s) afterwards. A directive can have any number of values, each separated by a space.
 
-> Uncaught EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "default-src 'none'".
+We can declare as many directives as we need, each separated by a semicolon after the last value of the previous directive.
 
-The error message is letting us know that our code is now being blocked because our `script-src` directive is missing the `'unsafe-eval'` value. Or, worded the other way around, the browser has detected use of the `eval()` function and has blocked the code from executing due to the [high risk](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!) it poses.
+- The _[directives](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#directives)_ relate to the different resources on our site (scripts, styles, fonts, images, etc.). For example, to specify where our images can be loaded from, we would use `img-src`.
 
-This error isn't actually being thrown by your code (unless you do use the _eval()_ function, in which case you should remove it and return back here) but instead by the development environment of Next.js, which uses `eval()` ["to generate and rebuild [eval source maps] during development"](https://github.com/vercel/next.js/issues/14221#issuecomment-657258278).
+- The _values_ tell the browser which origins are allowed for that directive. Each value is separated by a space. This typically consists of a URI string, but can also include predefined [keywords](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#keyword_values), which must be wrapped in `'single quotes'`.
 
-### 3. Creating a CSP Generator function
+Let's look at the Twitter website as an example. They use the HTTP response header method of setting a policy, and a cherry-picked snippet of it looks like this:
 
-To get our JavaScript working in development, we'll need to fix the issue regarding the missing `'unsafe-eval'` value. As this value should _only_ be present in the development environment, we'll create a short helper function to return our CSP values:
-
-```typescript
-// Return a Content Security Policy string
-const generateCSP = (): string => {
-  // Define the directives/values
-  const csp: Partial<Record<CSP, string>> = {
-    'default-src': `'none'`,
-    'script-src-elem': `'self'`
-  };
-
-  // Override directives outside production
-  if (process.env.NODE_ENV !== 'production') {
-    csp['script-src'] = `'self' 'unsafe-eval'`;
-  }
-
-  // Convert to string and return
-  return Object.entries(csp).reduce(
-    (acc, [key, val]) => `${acc} ${key} ${val};`,
-    ''
-  );
-};
+```
+content-security-policy:
+  font-src 'self' https://*.twimg.com;
+  img-src 'self' blob: data: https://*.cdn.twitter.com https://ton.twitter.com;
+  object-src 'none';
+  script-src 'self' 'nonce-ZDZiNGQyMjMtYTQ4YS00MmUyLWJiZjUtNzI0MjA0OTdiMzYy';
+  default-src 'self';
 ```
 
-The directives we originally defined in the CSP header have now been moved to the `csp` object, and we're now also defining the `script-src` directive to have the `'unsafe-eval'` value if we're not in the production environment.
+- the `font-src` directive is using the [`'self'` keyword](https://content-security-policy.com/self), which allows fonts hosted on the same origin to be loaded, as well as fonts from any subdomain on `twimg.com`
+- the `img-src` directive also uses the `'self'` keyword, allowing images hosted on the same origin to load, as well as any `blob:` and `data:`URIs ([arguably insecure](https://www.w3.org/TR/CSP3/#csp-directives)), and any images loaded on a subdomain of `cdn.twitter.com` or on `ton.twitter.com`
+- the `object-src` directive is using the [`'none'` keyword](https://content-security-policy.com/none) which means that _anything_ using this directive will be blocked; there is no allowed implementation
+- the `script-src` directive also uses the `'self'` keyword, allowing scripts hosted on the same origin to load, as well as the [`nonce-` keyword](https://content-security-policy.com/nonce), which holds a random, cryptographically secure token that can be attached to inline elements (scripts, in this case); we'll learn much more about this later
+- the `default-src` directive is also set to `self`; we'll learn more about this in just a moment
 
-If you're using TypeScript, the full `CSP` types can be found in [this Gist](https://gist.github.com/ReesMorris/6010c617f35681aaee1ea4dec74864a5). Also note that the `Object.entries()` method is not supported by IE11, so you may need to use a polyfill or different method if you require legacy browser support.
+It may be useful to know that the mapping of elements to directives is handled by the browser: if we add an `<img src="" />` element to our site, the browser will _always_ validate the `src` value against the `img-src` directive; we can't tell the browser to use something different.
 
-Let's update our middleware to use this function:
+## Starting from the bottom
 
-<TabList tabs={['With Express', 'Without Express']}>
+Arguably one of the most important CSP directives is the [`default-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src). This directive acts as the fallback if a specific directive is needed, but missing.
 
-<TabPanel>
+For instance, looking at the Twitter example above, let's say we add an iframe to our site. The browser would first check for a `frame-src` directive to compare the iframe's `src` value to. In the event the directive doesn't exist, the browser will fall back to the `default-src` directive instead, and will follow whatever rules are set there. In this case, our iframe would only load if the `src` was the same origin, due to the `default-src 'self'` declaration.
 
-<TabContent>
+This can be a blessing and a curse. Whilst it will save us time in the long run from having to declare dozens of different directives which all just use the `'self'` keyword, it also opens up a vulnerability for our site: _every_ undeclared directive will indirectly behave based on our `default-src` directive's values.
 
-```typescript
-res.setHeader('Content-Security-Policy', generateCSP());
-```
+As such, the Mozilla Observatory and CSP Quick Reference Guide both recommend setting `default-src` to `'none'` and expanding other _specific_ directives outwards when needed. With this mindset, if a directive isn't _explicitly_ declared, it's blocked. It makes the site much more secure, and debugging a _lot_ easier.
 
-</TabContent>
+## Implementing our CSP
 
-</TabPanel>
-
-<TabPanel>
-
-<TabContent>
-
-```typescript
-ctx.res.setHeader('Content-Security-Policy', generateCSP());
-```
-
-</TabContent>
-
-</TabPanel>
-
-</TabList>
-
-Now you'll notice that the JavaScript code is now working (hooray for progress!), but we also have an "Unhandled Runtime Error" message on the page. You may also notice a lot more inline styling errors, since the styled-components JavaScript code is now executing. The error we're most interested in is this:
-
-> Refused to connect to '&lt;URL&gt;' because it violates the following Content Security Policy directive: "default-src 'none'". Note that 'connect-src' was not explicitly set, so 'default-src' is used as a fallback.
-
-We'll need to define a `connect-src` directive to allow those URLs to be fetched. Let's add it to our `csp` object in the `generateCSP()` function, since we'll also want this in production. As the error messages show all of the URLs being from the same origin, we can again use the `'self'` value:
-
-```typescript
-const csp: Partial<Record<CSP, string>> = {
-  'default-src': `'none'`,
-  'script-src-elem': `'self'`,
-  'connect-src': `'self'`
-};
-```
-
-Our JavaScript now looks to be working without any other warnings on the page! The next step is to get our styling working.
-
-### 4. Fixing styling with a nonce
-
-In order for the browser to allow us to use inline scripts and styles _without_ using the `'unsafe-inline'` value, we need to convince the browser that the scripts and styles it sees are genuine and not maliciously injected by a third party. This is where the `nonce` attribute comes in.
-
-By definition, a nonce is a randomly generated token that should only be used once. The idea is that we'll generate the nonce on the server side and attach it to our CSP headers as an allowed value (something like `'nonce-xyz'`). We'll then pass it through to the frontend and attach it to all of our scripts and styles using the `nonce` attribute. Before executing any scripts/styles, the browser will then compare the attribute on the element with the value in the CSP header. If the two match, they are considered genuine and will be allowed to run. Simple!
-
-<Note type='info' icon={{ name: 'exclamation-circle' }}>
-
-If you are developing for IE11, the `nonce` attribute is not supported by the browser. With that said, the `Content-Security-Policy` header is not supported either (only _X-Content-Security-Policy_ is supported). This means that the use of inline styling will not affect visitors using IE11, though it may be worth considering another approach using the [sandbox](https://docs.microsoft.com/en-us/archive/blogs/ie/defense-in-depth-locking-down-mash-ups-with-html5-sandbox) directive.
-
-</Note>
-
-Let's get started! The first step is to generate the random token. I'll be using the built-in `crypto` library for this, though feel free to use any similar library (such as `uuid`) if you already have one installed.
-
-The [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#generating_values) recommend the nonce to be a "base64-encoded string of at least 128 bits of data from a cryptographically secure random number generator," so we'll do just that:
-
-```typescript
-import { randomBytes } from 'crypto';
-
-const generateNonce = () => {
-  return randomBytes(16).toString('base64');
-};
-```
-
-Next we'll want to return the nonce with our CSP header by updating our `generateCSP()` function to accept the nonce as an argument. We'll also take this opportunity to append the `style-src` and `script-src` directives to our `csp` object since we know we'll need both of those. Because we're overriding the `script-src` directive in development, we'll also want to attach the nonce to that as well.
-
-```typescript
-// Return a Content Security Policy string
-const generateCSP = (nonce: string): string => {
-  // Define the directives/values
-  const csp: Partial<Record<CSP, string>> = {
-    'default-src': `'none'`,
-    'script-src-elem': `'self' 'nonce-${nonce}'`,
-    'connect-src': `'self'`,
-    'style-src': `'self' 'nonce-${nonce}'`,
-    'script-src': `'self' 'nonce-${nonce}'`
-  };
-
-  // Override directives outside production
-  if (process.env.NODE_ENV !== 'production') {
-    csp['script-src'] = `'self' 'unsafe-eval' 'nonce-${nonce}'`;
-  }
-
-  // Convert to string and return
-  return Object.entries(csp).reduce(
-    (acc, [key, val]) => `${acc} ${key} ${val};`,
-    ''
-  );
-};
-```
-
-Next, let's generate the nonce and pass it into the `generateCSP()` function.
-
-<TabList tabs={['With Express', 'Without Express']}>
-
-<TabPanel>
-
-<TabContent>
-
-We'll need to make the nonce available to our Next.js context (`ctx`) by providing it in our Express response as a _local_.
-
-```typescript
-// CSP Middleware for Express
-server.use((_req: Request, res: Response, next: NextFunction) => {
-  // Generate the random token
-  const nonce = generateNonce();
-
-  // Set the CSP header
-  res.setHeader('Content-Security-Policy', generateCSP(nonce));
-
-  // Make the nonce available to Next.js
-  res.locals.nonce = nonce;
-
-  // Continue to the next middleware
-  next();
-});
-```
-
-Restart the server to ensure the changes are active, and then open the `pages/_document` file in your Next.js frontend. We'll firstly want to receive the nonce from our _locals_ within our `getInitialProps` function, making it available to our render function:
-
-```tsx
-import { Response } from 'express';
-
-const { locals } = ctx.res as Response;
-const additionalProps = { nonce: locals && locals.nonce };
-
-return {
-  ...initialProps,
-  ...additionalProps
-  // ...
-};
-```
+Let's add a Content Security Policy to our site.
 
 <Note type='info' icon={{ name: 'sparkles' }}>
 
-If `ctx.res` is returning _undefined_, it means your application has not disabled [automatic static optimisation](https://nextjs.org/docs/advanced-features/automatic-static-optimization). Please check the [Setup](#setup) section for more information on this.
+Although the code examples are in Next.js with styled-components, the majority of what we write should be easily transferable to other frameworks or projects - simply copy whatever is relevant to you!
+
+I've also created a [follow-along project](https://github.com/ReesMorris/nextjs-styled-components-csp) if you're keen on that!
 
 </Note>
 
-</TabContent>
+As above, we'll start with just a simple `default-src 'none'` declaration within a meta tag, and then begin expanding outwards until our site returns to its expected behaviour.
 
-</TabPanel>
-  
-<TabPanel>
+You can either add the tag to a [custom \_document file](https://nextjs.org/docs/advanced-features/custom-document), or an existing component that imports [next/head](https://nextjs.org/docs/api-reference/next/head) (such as an SEO component).
 
-<TabContent>
+Be sure to place it above all other tags and scripts.
 
-Just before calling our `ctx.res.setHeader()` method, we'll want to generate the nonce and pass it in:
+<TabList tabs={['Using _document', 'Using next/head']}>
 
-```typescript
-const nonce = generateNonce();
-ctx.res.setHeader('Content-Security-Policy', generateCSP(nonce));
+  <TabPanel>
+
+```jsx
+/* ... */
+render() {
+  return (
+    <Html>
+      <Head>
+        <meta
+          httpEquiv='Content-Security-Policy'
+          content="default-src 'none'"
+        />
+      </Head>
+      <body>
+        <Main />
+        <NextScript />
+      </body>
+    </Html>
+  );
+}
 ```
 
-We'll also need to make the nonce available to the `render` method, so let's create an `additionalProps` object:
+  </TabPanel>
 
-```typescript
-const additionalProps = { nonce };
+  <TabPanel>
 
-return {
-  ...initialProps,
-  ...additionalProps
-  // ...
+```jsx
+import React from 'react';
+import NextHead from 'next/head';
+
+const Head = () => {
+  return (
+    <NextHead>
+      <meta httpEquiv='Content-Security-Policy' content="default-src 'none'" />
+    </NextHead>
+  );
 };
+
+export default Head;
 ```
 
-</TabContent>
+You'll of course need to include this in your `_app` page (or any component that wraps all pages, like a custom `Page` component).
 
-</TabPanel>
+  </TabPanel>
 
 </TabList>
 
-Inside the `render` function, we can then pull the nonce:
+When refreshing the site, you might notice that _everything has broken_. Let's see what's going on.
+
+## Breaking down CSP errors
+
+Most browsers tend to provide extremely helpful information when it comes to _why_ our elements are being blocked when a Content Security Policy is in place.
+
+I'll be using the [follow-along repository](https://github.com/ReesMorris/nextjs-styled-components-csp) for this, so your order of errors may differ - though we'll be resolving them all anyway!
+
+When looking at the browser console in Chrome, the first errors for me have all been collapsed into the following message:
+
+> Refused to load the script '&lt;URL&gt;' because it violates the following Content Security Policy directive: "default-src 'none'". Note that 'script-src-elem' was not explicitly set, so 'default-src' is used as a fallback.
+
+From this message alone, we get some idea of what's happening. We know already that certain URLs have been blocked from executing, and we can see that they are part of the `script-src-elem` directive. When expanding the list of errors, it looks like they all come from the local `_next/static` directory - hosted within the same origin of our site (localhost).
+
+We _could_ whitelist our current origin (http://localhost:3000 in my case) along with our live domain (such as reesmorris.co.uk), but that can make things potentially unsafe if our domain ever changes, as well as a pain to manage if your site has regional domains. This is where the power of the [`self` keyword](https://content-security-policy.com/self) comes in. Instead of having to directly declare the domains the user will be visiting the site on, the `'self'` keyword simply represents just that: the current origin!
+
+Following the error message in the browser, we know we just need to declare a `script-src-elem` directive with the `'self'` keyword value to fix this error. Let's update our policy just as such:
+
+```html
+<meta
+  httpEquiv="Content-Security-Policy"
+  content="default-src 'none'; script-src-elem 'self'"
+/>
+```
+
+Reloading the page doesn't give us much more to see, but the errors have changed! This is because those scripts are now being allowed to run, which can lead to other errors.
+
+The next error to appear is:
+
+> Uncaught EvalError: Refused to evaluate a string as JavaScript because 'unsafe-eval' is not an allowed source of script in the following Content Security Policy directive: "default-src 'none'".
+
+This error is telling us that a script was prevented from running because it uses the `eval()` function, which is blocked by default due to the [high risk](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!) it poses.
+
+This error isn't actually being thrown by your code (unless you do use the _eval()_ function, in which case you should remove it and return here), but instead by the development environment of Next.js, which uses `eval()` ["to generate and rebuild [eval source maps] during development"](https://github.com/vercel/next.js/issues/14221#issuecomment-657258278).
+
+Let's add a `script-src` directive with the `unsafe-eval` keyword and see what changes:
+
+```html
+<meta
+  httpEquiv="Content-Security-Policy"
+  content="default-src 'none'; script-src-elem 'self'; script-src 'unsafe-eval'"
+/>
+```
+
+Success(?)! The content of the page is now visible, but we've now got two problems to deal with. The first is that there seems to be a giant "Unhandled Runtime Error" message on the page, and the second is we've just added `'unsafe-eval'` to our Content Security Policy; which we definitely don't want in production.
+
+Looking at the console, there's a whole bunch more errors now - since a lot more things are running and then being blocked. Ignoring all styled-components related errors for now, this one stands out:
+
+> Refused to connect to 'ws://localhost:3000/\_next/webpack-hmr' because it violates the following Content Security Policy directive: "default-src 'none'". Note that 'connect-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+It looks like Webpack is requiring a `connect-src` directive to be present. All of the collapsed URLs again point solely to our localhost origin, so we can again use the `'self'` keyword here:
+
+```html
+<meta
+  httpEquiv="Content-Security-Policy"
+  content="default-src 'none'; script-src-elem 'self'; script-src 'unsafe-eval'; connect-src 'self'"
+/>
+```
+
+Hooray! Our errors have gone, and all JavaScript and links on the development site are behaving as normal. We still don't have any styling, but we'll get to that after making our policy much safer.
+
+## Creating a CSP Generator function
+
+We obviously don't want `'unsafe-eval'` to be present in our production build, and we can probably remove `connect-src` in production too, since (in the follow-along example) only Webpack requires it. We could make a conditional that returns different strings, but that will make this extremely difficult to maintain.
+
+Instead, let's make a function that 'generates' our CSP for us!
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+  <TabPanel>
+
+```javascript
+// utils/generate-csp.js
+const generateCSP = () => {
+  const policy = {};
+
+  // adder function for our policy object
+  const add = (directive, value, options = {}) => {
+    if (options && process.env.NODE_ENV !== 'development') return;
+    const curr = policy[directive];
+    policy[directive] = curr ? [...curr, value] : [value];
+  };
+
+  // default-src
+  add('default-src', `'none'`);
+
+  // script-src-elem
+  add('script-src-elem', `'self'`);
+
+  // script-src
+  add('script-src', `'unsafe-eval'`, { devOnly: true });
+
+  // connect-src
+  add('connect-src', `'self'`, { devOnly: true });
+
+  // return the object in a formatted value (this won't work on IE11 without a polyfill!)
+  return Object.entries(policy)
+    .map(([key, value]) => `${key} ${value.join(' ')}`)
+    .join('; ');
+};
+
+export default generateCSP;
+```
+
+  </TabPanel>
+
+  <TabPanel>
+
+```typescript
+// utils/generate-csp.ts
+type Directive = ''; /* See the Gist link below */
+type Value = string;
+interface Options {
+  devOnly?: boolean;
+}
+
+const generateCSP = () => {
+  const policy: Partial<Record<Directive, Value[]>> = {};
+
+  // adder function for our policy object
+  const add = (directive: Directive, value: Value, options: Options = {}) => {
+    if (options.devOnly && process.env.NODE_ENV !== 'development') return;
+    const curr = policy[directive];
+    policy[directive] = curr ? [...curr, value] : [value];
+  };
+
+  // default-src
+  add('default-src', `'none'`);
+
+  // script-src-elem
+  add('script-src-elem', `'self'`);
+
+  // script-src
+  add('script-src', `'unsafe-eval'`, { devOnly: true });
+
+  // connect-src
+  add('connect-src', `'self'`, { devOnly: true });
+
+  // return the object in a formatted value (this won't work on IE11 without a polyfill!)
+  return Object.entries(policy)
+    .map(([key, value]) => `${key} ${value.join(' ')}`)
+    .join('; ');
+};
+
+export default generateCSP;
+```
+
+<TabContent>
+
+I've included the `Directive` types in [this Gist](https://gist.github.com/ReesMorris/6010c617f35681aaee1ea4dec74864a5).
+
+</TabContent>
+
+  </TabPanel>
+
+</TabList>
+
+This is my personal preference for writing CSP declarations, but you're certainly free to modify this to your own style. The main idea was to declare one directive and value per line, so that we can easily refer to the file without having to scroll forever horizontally. The options object only takes one value, though seeing `devOnly` written next to each declaration makes it impossible to confuse.
+
+<Note type='info' icon={{ name: 'graduation-cap' }}>
+
+Some guides may suggest 'disabling' CSP when in development, by either not returning the header or setting every declaration to be `'unsafe-xyz'`. I believe it's much better to have your development version _as close_ to the production version as possible; it'll save you a lot of headaches later.
+
+</Note>
+
+Let's make sure our code is using it.
+
+```jsx
+<meta httpEquiv='Content-Security-Policy' content={generateCSP()} />
+```
+
+Nothing should have changed for you, meaning it's time to fix the styling!
+
+## Inline styles
+
+Let's have a look at the errors being thrown for our styled components:
+
+> Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'none'". Either the 'unsafe-inline' keyword, a hash ('sha256-...='), or a nonce ('nonce-...') is required to enable inline execution. Note also that 'style-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+This message is different to the previous ones, and there's more information to digest. It's essentially telling us that the browser blocked our inline styling because our `style-src` directive needs to include one of the following:
+
+- the `'unsafe-inline'` keyword
+- a sha256 (or [similar](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy#other_values)) hash
+- a nonce value
+
+The first option is to use the [`'unsafe-inline'` keyword](https://content-security-policy.com/unsafe-inline). As the name suggests, this method is considered unsafe as it will allow any inline styles to run, regardless of whether they were present when the site loaded or added in later by a malicious third party. It somewhat defeats the purpose of having a policy in place.
+
+The second option is to generate a sha256 hash of our inline styles and pass the hash as one of the values for our `style-src` directive. This could work in theory, but if you're using _any_ form of CSS-in-JS solution, just one piece of conditional rendering logic (eg. a user clicks a button, changing a colour) would break this; when the CSS of the inline style changes, it wouldn't match the hash anymore.
+
+The third option is likely our best bet, a [nonce value](https://content-security-policy.com/nonce). A nonce is a randomly generated token used only once (Number Only used oNCE). The theory is that our server will generate this random token when the user visits the site, attach the nonce as a value to our `style-src` directive, and also pass the value to Next.js to attach it as a `nonce=''` attribute on our inline styles.
+
+This is where this post diverges depending on your infrastructure. In order to generate a nonce value, we _need_ our site to be behind a server. More specifically, we need _every page_ on our site to be server-side rendered at runtime by having `getInitialProps()` in a [custom `_app`](https://nextjs.org/docs/advanced-features/custom-app). This likely isn't possible if you have any kind of static site, such as this one.
+
+Let's explore some options below.
+
+## Working without a server
+
+If you don't have a custom `_app` with `getInitialProps` set up, you'll need to declare `'unsafe-inline'` in your `style-src` directive for the site to work with styled components (or any library that creates inline styles). _I think that is okay_.
+
+So long as we're talking exclusively about using `'unsafe-inline'` in the context of styling and _never_ for scripts, _my opinion_ is that you should be fine. If your Content Security Policy is strong for all other directives (eg. `img-src`), there is very little that CSS-based XSS attacks can achieve.
+
+```javascript
+// style-src
+add('style-src', `'unsafe-inline'`);
+```
+
+For further relief (at the time of writing), both [Twitter's report](https://observatory.mozilla.org/analyze/twitter.com) and [Spotify's report](https://observatory.mozilla.org/analyze/spotify.com) on Mozilla Observatory both include `'unsafe-inline'` for styling, but their overall scores couldn't be higher. We're always limited in some way by the architecture we choose, though it's clear that achieving a top-grade security score is doable regardless of how you're using Next.js.
+
+_Again, I am by no means a security expert so do conduct additional research if this is very important for you._
+
+<Note type='info' icon={{ name: 'graduation-cap' }}>
+
+If you're thinking of stopping here, there's a few [bonus items](#bonus-google-fonts) at the bottom of the page that anyone can follow to greatly improve their site's security policies in just a few minutes.
+
+</Note>
+
+### (Optional) Inline scripts
+
+If your site uses any inline scripts, this section discusses how to allow those through your Content Security Policy without using the `'unsafe-inline'` keyword. If your site is completely server-side rendered (eg. a custom `_app` with `getInitialProps`) then you'll instead be able to use the nonce we generate later on, so feel free to skip this.
+
+You may have noticed the same error as for inline styles. The one difference here is that we should **never** use `'unsafe-inline'` for script directives, as that can have _massive_ security implications (to a point where having CSP is arguably useless!).
+
+Instead, let's create a helper function that will hash our inline scripts.
+
+Note that you'll _only_ need this for inline scripts; if you have any `<script>` tags with a `src` attribute, you won't need to hash those -but will need to allow their origins in your CSP. If you have any scripts of `type="application/json"`, they also won't need hashing as the browser doesn't evaluate those.
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+  <TabPanel>
+
+```javascript
+// hash-inline-scripts.js
+import crypto from 'crypto';
+
+const hash = content =>
+  crypto.createHash('sha256').update(content).digest('base64');
+
+const hashInlineScripts = scripts => {
+  const scriptHashes = scripts.map(script => {
+    const content = script.props.dangerouslySetInnerHTML
+      ? script.props.dangerouslySetInnerHTML.__html
+      : script.props.children;
+    return `'sha256-${hash(content)}'`;
+  });
+  return { scriptHashes, scripts };
+};
+
+export default hashInlineScripts;
+```
+
+  </TabPanel>
+
+  <TabPanel>
+
+```typescript
+// hash-inline-scripts.ts
+import crypto from 'crypto';
+
+const hash = (content: string) =>
+  crypto.createHash('sha256').update(content).digest('base64');
+
+const hashInlineScripts = (scripts: JSX.Element[]) => {
+  const scriptHashes = scripts.map(script => {
+    const content = script.props.dangerouslySetInnerHTML
+      ? script.props.dangerouslySetInnerHTML.__html
+      : script.props.children;
+    return `'sha256-${hash(content)}'`;
+  });
+  return { scriptHashes, scripts };
+};
+
+export default hashInlineScripts;
+```
+
+  </TabPanel>
+
+</TabList>
+
+This helper function will receive an array of `<script>` tags, hash their values, and return the original array. For all inline scripts we wish to embed in the site, we'll want to call this function _before_ calling our `generateCSP()` function, like so:
+
+```javascript
+const { scriptHashes, hashes } = hashInlineScripts([
+  <script dangerouslySetInnerHTML={{ __html: `console.log('a')` }} />,
+  <script dangerouslySetInnerHTML={{ __html: `console.log('b')` }} />
+]);
+```
+
+We'll want to update our `generateCSP()` function to accept these hashes:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+  <TabPanel>
+
+```javascript
+const generateCSP = ({ scriptHashes } = {}) => {
+  /* ... */
+
+  // script-src-elem
+  add('script-src-elem', `'self'`);
+  scriptHashes && scriptHashes.forEach(hash => add('script-src-elem', hash));
+
+  /* ... */
+};
+```
+
+  </TabPanel>
+
+  <TabPanel>
+
+```typescript
+interface generateCSPProps {
+  scriptHashes?: string[];
+}
+
+const generateCSP = ({ scriptHashes }: generateCSPProps = {}) => {
+  /* ... */
+
+  // script-src-elem
+  add('script-src-elem', `'self'`);
+  scriptHashes && scriptHashes.forEach(hash => add('script-src-elem', hash));
+
+  /* ... */
+};
+```
+
+  </TabPanel>
+
+</TabList>
+
+And, lastly, update our head to pass these hashes in, as well as render the scripts:
+
+```jsx
+<Head>
+  <meta
+    httpEquiv='Content-Security-Policy'
+    content={generateCSP({ scriptHashes })}
+  />
+  {scripts}
+</Head>
+```
+
+Alas, our inline scripts should now be executing!
+
+The only caveat is that the content of your inline script _can't_ change whilst the user is on the site, as this will invalidate the hash that was generated and will be blocked from running. I believe this also won't work with [next/script tags](https://nextjs.org/docs/basic-features/script).
+
+<Note type='info' icon={{ name: 'sparkles' }}>
+
+If your site isn't completely server-side rendered, the next few sections won't be relevant - but feel free to follow for the theory!
+
+</Note>
+
+## Generating a nonce server-side
+
+Whilst the following process is arguably more secure than using `'unsafe-inline'` for styling, you may not need it. The process is somewhat convoluted and may cost more time than it's worth. Nonetheless, let's go!
+
+As mentioned above, we can only generate a nonce value on the server before passing it down to our frontend. As such, we'll need a [custom `_app`](https://nextjs.org/docs/advanced-features/custom-app) for this. At the time of writing, [Next.js Middleware](https://nextjs.org/docs/middleware) has been released but there is [no information](https://github.com/vercel/next.js/discussions/29750#discussioncomment-1537361) on passing data from the middleware to the custom `_app`.
+
+If you're using a custom server to wrap your Next.js frontend (such as Express), you'll _still_ need to ensure every Next.js page is server-side rendered, so you'll still need a [custom `_app`](https://nextjs.org/docs/advanced-features/custom-app) with `getInitialProps`.
+
+<Note type='info' icon={{ name: 'graduation-cap' }}>
+
+A quick refresher on the theory here: we'll be generating a nonce value / token on the server side, and passing it through to our components in the frontend. For every resource that needs the value (usually inline scripts and styles), we'll attach a [nonce attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce) to those elements. We'll also make sure the nonce is provided as one of the directive values in our CSP, much in the same way as with the hashes above.
+
+</Note>
+
+The first step is to generate the random token. The [MDN Docs recommend](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#generating_values) the nonce to be a "base64-encoded string of at least 128 bits of data from a cryptographically secure random number generator," so let's do just that by creating a util function:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+  <TabPanel>
+
+```javascript
+// utils/generate-nonce.js
+import crypto from 'crypto';
+
+const generateNonce = () => {
+  return crypto.randomBytes(16).toString('base64');
+};
+
+export default generateNonce;
+```
+
+  </TabPanel>
+
+  <TabPanel>
+
+```typescript
+// utils/generate-nonce.ts
+import crypto from 'crypto';
+
+const generateNonce = (): string => {
+  return crypto.randomBytes(16).toString('base64');
+};
+
+export default generateNonce;
+```
+
+  </TabPanel>
+
+</TabList>
+
+We're using the built-in `crypto` library here, though feel free to use any cryptographically-secure generator (such as the `uuid` library).
+
+As mentioned earlier on, a Content Security Policy can be added to a site either as a HTTP header _returned by the web server_, or as a meta tag within the head. As we'll be generating the nonce on the server, we might as well have our entire middleware handle the CSP as well!
+
+Let's remove the `<meta httpEquiv='Content-Security-Policy' />` tag from our frontend &mdash; we're going to move it to be a HTTP header instead.
+
+For the next steps, we'll be generating the nonce in our `_document` file and returning it as a header. If you have a custom server set up (eg. Express), it might be more logical for you to send the `Content-Security-Policy` header from a middleware there instead. That's absolutely fine, though just be sure to pass the generated nonce to the frontend in the [res.locals](https://expressjs.com/en/api.html#res.locals) (or equivalent).
+
+Let's add some lines to our `_document` file. You should have one set up already if you're using styled components, though you can copy the [Custom `Document`](https://nextjs.org/docs/advanced-features/custom-document) template if needed.
+
+Within the `getInitialProps` function:
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+  <TabPanel>
+
+```javascript
+// pages/_document.jsx
+const nonce = generateNonce();
+ctx.res.setHeader('Content-Security-Policy', generateCSP({ nonce }));
+```
+
+  </TabPanel>
+
+  <TabPanel>
+
+```typescript
+// pages/_document.tsx
+const nonce = generateNonce();
+ctx.res.setHeader('Content-Security-Policy', generateCSP({ nonce }));
+```
+
+  </TabPanel>
+
+</TabList>
+
+You've likely noticed that our `generateCSP` function doesn't accept an argument for the nonce &mdash; let's quickly fix that. If you followed the inline scripts section, you'll also accept an argument for `scriptHashes` here.
+
+<TabList tabs={['JavaScript', 'TypeScript']}>
+
+  <TabPanel>
+
+```javascript
+// utils/generate-csp.js
+const generateCSP = ({ nonce }) => {
+  /* ... */
+
+  // script-src-elem
+  add('script-src-elem', `'self'`);
+  add('script-src-elem', `'nonce-${nonce}'`);
+
+  // style-src
+  add('style-src', `'nonce-${nonce}'`);
+  add('style-src', `'unsafe-inline'`);
+
+  /* ... */
+};
+```
+
+  </TabPanel>
+
+  <TabPanel>
+
+```typescript
+// utils/generate-csp.ts
+interface generateCSPProps {
+  nonce?: string;
+}
+
+const generateCSP = ({ nonce }: generateCSPProps = {}) => {
+  /* ... */
+
+  // script-src-elem
+  add('script-src-elem', `'self'`);
+  add('script-src-elem', `'nonce-${nonce}'`);
+
+  // style-src
+  add('style-src', `'nonce-${nonce}'`);
+  add('style-src', `'unsafe-inline'`);
+
+  /* ... */
+};
+```
+
+  </TabPanel>
+
+</TabList>
+
+After reloading the site, something peculiar happens: our scripts still work fine, but the styling has disappeared again. We didn't remove `'unsafe-inline'` from our CSP, so what gives? The developer console in Chrome provides a great explanation:
+
+> 'unsafe-inline' is ignored if either a hash or nonce value is present in the source list.
+
+As a result of adding the nonce to our CSP, our `'unsafe-inline'` styling is no longer being rendered. Since we haven't yet linked the nonce with our inline styles, the browser doesn't trust any of them.
+
+Certain libraries, including styled-components, allow for the nonce attribute to be provided via a `__webpack_nonce__` variable, which is used primarily by webpack to inject the nonce attribute to any scripts loads. To add this to our frontend, we simply need to inject it via a `<script>` tag in the document head.
+
+Back inside our custom `_document` file:
 
 <TabList tabs={['JavaScript', 'TypeScript']}>
 
@@ -382,14 +658,34 @@ Inside the `render` function, we can then pull the nonce:
 
 <TabContent>
 
-```javascript
-render() {
-    const { nonce } = this.props;
+Just after the `initialProps` variable declaration, add:
 
-    return (
-      // ..
-    );
-  }
+```javascript
+const initialProps = await Document.getInitialProps(ctx);
+const additionalProps = { nonce }; // 👈 add this
+
+return {
+  ...initialProps,
+  ...additionalProps, // 👈 and this!
+  styles: /* ... if using styled-components ... */
+};
+```
+
+Within the `render()` method, before the `return` statement, add:
+
+```javascript
+const { nonce } = this.props;
+```
+
+And within the `<Head>` tag, add:
+
+```jsx
+<script
+  nonce={nonce}
+  dangerouslySetInnerHTML={{
+    __html: `window.__webpack_nonce__ = "${nonce}"`
+  }}
+/>
 ```
 
 </TabContent>
@@ -400,7 +696,7 @@ render() {
 
 <TabContent>
 
-At the top of the file, add the `interface` declaration:
+Before the `MyDocument` class declaration, add:
 
 ```typescript
 interface DocumentProps {
@@ -408,24 +704,40 @@ interface DocumentProps {
 }
 ```
 
-We'll then provide that to our class:
+Update the `MyDocument` class to extend this:
 
 ```typescript
-export default class MyDocument extends Document<DocumentProps> {
-  // ...
-}
+export default class MyDocument extends Document<DocumentProps>
 ```
 
-And then pull the nonce:
+Just after the `initialProps` variable declaration, add:
 
 ```typescript
-render() {
-    const { nonce } = this.props;
+const initialProps = await Document.getInitialProps(ctx);
+const additionalProps = { nonce }; // 👈 add this
 
-    return (
-      // ...
-    );
-  }
+return {
+  ...initialProps,
+  ...additionalProps, // 👈 and this!
+  styles: /* ... if using styled-components ... */
+};
+```
+
+Within the `render()` method, before the `return` statement, add:
+
+```typescript
+const { nonce } = this.props;
+```
+
+And within the `<Head>` tag, add:
+
+```tsx
+<script
+  nonce={nonce}
+  dangerouslySetInnerHTML={{
+    __html: `window.__webpack_nonce__ = "${nonce}"`
+  }}
+/>
 ```
 
 </TabContent>
@@ -434,58 +746,11 @@ render() {
 
 </TabList>
 
-Next, we'll want to make our `nonce` available to all scripts and styles within Next.js itself. We simply need to pass the value as an attribute to the _Head_ and _NextScript_ components:
+The site should now have some unique behaviour: the styling _appears_, but also seems to take a second to appear. If we disable JavaScript in our browser, the styling will be gone completely.
 
-```tsx
-<Html lang='en-GB'>
-  <Head nonce={nonce} />
-  <body>
-    <Main />
-    <NextScript nonce={nonce} />
-  </body>
-</Html>
-```
+This is happening because our `__webpack_nonce__` variable only exists on the `window` object, which doesn't exist on the server. As such, styled-components only pulls the value after the app rehydrates on the client side.
 
-After refreshing the page, we _still_ don't have any styling on the site. This is because we've passed our nonce through to all scripts that Next.js loads, but styled-components styles are loaded with webpack.
-
-### 5. Defining \_\_webpack_nonce\_\_
-
-Certain libraries, including styled-components, allow for the nonce attribute to be provided via a `__webpack_nonce__` variable, which is used primarily by webpack to inject the nonce attribute to any scripts loads.
-
-To add this to our frontend, we simply need to inject it via a `<script>` tag in our `pages/_document` file's `return` function, not forgetting to add our nonce to the script itself.
-
-```tsx
-return (
-  <Html lang='en-GB'>
-    <Head nonce={nonce}>
-      <script
-        nonce={nonce}
-        dangerouslySetInnerHTML={{
-          __html: `window.__webpack_nonce__ = "${nonce}"`
-        }}
-      />
-    </Head>
-    <body>
-      <Main />
-      <NextScript nonce={nonce} />
-    </body>
-  </Html>
-);
-```
-
-<Note type='info' icon={{ name: 'graduation-cap' }}>
-
-Although it might sound counter-productive exposing the nonce value in the source code, it's actually completely safe from XSS attacks. Attackers would still need to know the nonce value in advance before they can read the value of the `__webpack_nonce__` variable, since their injected scripts would be blocked without it.
-
-</Note>
-
-If you refresh the page, you'll notice the styling appears 🎉! However, you may have noticed a slight issue: for a brief moment after the page loads, the styling is completely missing before it flashes in. If you disable JavaScript, you'll notice the styling is missing permanently.
-
-This is due to the fact that our `__webpack_nonce__` variable only exists on the client side; we're embedding it as a `<script>` tag on the server, so styled-components doesn't actually know the value of the nonce until the app hydrates on the client side. As a result, our CSP policy is blocking the styling from rendering during the initial server render.
-
-Unfortunately, there is no clean way of passing our nonce value directly through to styled-components yet. I opened a [GitHub issue](https://github.com/styled-components/styled-components/issues/3468) which should hopefully allow us to pass the nonce through directly, but for now we'll need to use a workaround. After investigating how styled-components fetches the nonce, it checks the environment for a `window` object containing the `__webpack_nonce__` variable.
-
-Whilst the `window` variable (rightfully) only exists on the client, we'll need to 'mock' it on our server so that the server-rendered components are also able to see the variable.
+Unfortunately, there is no clean way of passing our nonce value directly through to styled-components yet. The previous method I suggested in this post last year seems to no longer work, though thankfully I've discovered a less-hacky (but still hacky) solution!
 
 <TabList tabs={['JavaScript', 'TypeScript']}>
 
@@ -493,15 +758,34 @@ Whilst the `window` variable (rightfully) only exists on the client, we'll need 
 
 <TabContent>
 
-Before calling the `getStyleElement()` method, add this line:
+Just after the `additionalProps` variable declaration, add:
 
 ```javascript
-global.window = {
-  __webpack_nonce__: locals && locals.nonce
-};
+const sheetStyles = sheet.getStyleElement();
+const style =
+  (sheetStyles &&
+    React.Children.map(sheetStyles, child =>
+      React.cloneElement(child, {
+        nonce
+      })
+    )) ||
+  null;
 ```
 
-If you're not using Express, replace `locals && locals.nonce` with `nonce`.
+Ensure to pass the `style` variable into your `return` statement:
+
+```javascript
+return {
+  ...initialProps,
+  ...additionalProps,
+  styles: (
+    <>
+      {initialProps.styles}
+      {style}
+    </>
+  )
+};
+```
 
 </TabContent>
 
@@ -511,23 +795,34 @@ If you're not using Express, replace `locals && locals.nonce` with `nonce`.
 
 <TabContent>
 
-At the top of the file, add the `interface` declaration:
+Just after the `additionalProps` variable declaration, add:
 
 ```typescript
-interface MockWindow {
-  __webpack_nonce__?: string;
-}
+const sheetStyles = sheet.getStyleElement();
+const style =
+  (sheetStyles &&
+    React.Children.map(sheetStyles, child =>
+      React.cloneElement(child, {
+        nonce
+      } as React.StyleHTMLAttributes<HTMLStyleElement>)
+    )) ||
+  null;
 ```
 
-Before calling the `getStyleElement()` method, add this line:
+Ensure to pass the `style` variable into your `return` statement:
 
 ```typescript
-(global.window as MockWindow) = {
-  __webpack_nonce__: locals && locals.nonce
+return {
+  ...initialProps,
+  ...additionalProps,
+  styles: (
+    <>
+      {initialProps.styles}
+      {style}
+    </>
+  )
 };
 ```
-
-If you're not using Express, replace `locals && locals.nonce` with `nonce`.
 
 </TabContent>
 
@@ -535,13 +830,13 @@ If you're not using Express, replace `locals && locals.nonce` with `nonce`.
 
 </TabList>
 
-After reloading the page one final time, you'll now notice the styles are displaying immediately. Whilst this isn't the best strategy by any means, I'll be sure to update this post if the issue mentioned above is resolved.
+The site should now be fully styled, even with JavaScript disabled and before the client-side rehydration! Essentially, we're cloning the React `<style>` elements that styled-components is generating for us, but passing in our nonce value as an attribute.
 
-And that's all there is to it! I hope this post has been insightful enough to help explain not only _how_ to set strong Content Security Policy headers with Next.js and styled-components, but also what their purpose is for in general.
+And that's all there is to it! I hope this post has been insightful enough to help explain not only how to set strong Content Security Policy headers, but also what their purpose is for in general.
 
 Go forth and make strong websites!
 
-### Bonus: Google Fonts
+## Bonus: Google Fonts
 
 If you're using the 'follow-along' repository, or just have Google Fonts embedded into your website generally, you may notice the fonts are still not loading.
 
@@ -550,52 +845,47 @@ This is again due to the fact that we haven't whitelisted the domain that the fo
 Taking a look at the console, the styling is missing because the Google Fonts domain is missing in our `style-src` directive. Let's add it to our `generateCSP` function:
 
 ```typescript
-'style-src': `'self' 'nonce-${nonce}' https://fonts.googleapis.com`
+add('style-src', 'https://fonts.googleapis.com');
 ```
 
 After reloading, you'll notice another error related to a missing `font-src` directive value. Let's add that as well:
 
 ```typescript
-'font-src': `https://fonts.gstatic.com`
+add('font-src', 'https://fonts.gstatic.com');
 ```
 
 Notice that this time we didn't include the `'self'` value? If you aren't hosting any fonts within the project itself (meaning no fonts will be loaded from the same frontend URL), there's really no need to add it.
 
 And after reloading one final time, the fonts should appear!
 
-### Bonus 2: Maximising our CSP
+## Bonus 2: Maximising our CSP
 
 The [Mozilla Observatory](https://observatory.mozilla.org) recommends adding a few extra headers that we haven't yet specified in order to maximise the strength of our CSP.
 
 The [frame-ancestors](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/frame-ancestors) directive can be used to prevent clickjacking, by limiting which origins will be able to embed ours in an `<iframe>` or similar.
 
 ```typescript
-'frame-ancestors': `'none'`
+add('frame-ancestors', `'none'`);
 ```
 
 The [base-uri](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/base-uri) directive limits which origins will be able to reference ours in a `<base>` element, which could be used to trick our site into loading untrusted scripts.
 
 ```typescript
-'base-uri': `'none'`
+add('base-uri', `'none'`);
 ```
 
 The [form-action](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action) directive restricts which origins `<form>` elements are allowed to submit to, which can prevent sensitive data from being submitted to a malicious domain. This only affects the `action` attribute on forms (and not JavaScript that might call _preventDefault()_), so you'll only need to include `'self'` (or another origin) here if your forms need to be able to submit without JavaScript.
 
 ```typescript
-'form-action': `'none'`
+add('form-action', `'none'`);
 ```
 
+## Bonus 3: Maximum security
+
+I mentioned it slightly earlier, but Next.js has a great [documentation page on Security Headers](https://nextjs.org/docs/advanced-features/security-headers) that can really increase a website's security rating (especially on the SecurityHeaders website).
+
+For the most part, the list of [options](https://nextjs.org/docs/advanced-features/security-headers#options) on the page can simply be copy/pasted into your `next.config.js` file. It's a small addition that can add some great security to your site.
+
+It's also potentially possible to call your `generateCSP` function in this file instead, though it won't work if you need a nonce value, and you might need to re-code the function to be CommonJS-friendly since you can't use ES Modules there just yet.
+
 And, just like that, we've got an amazingly strong Content Security Policy setup. Neat!
-
-<!--
-
-
-* add unsafe-inline for legacy support (after adding nonce)
-
-* OPTIONAL: Adding a useNonce hook so we can pass it over to other scripts
-
-### Fixing Google Fonts
-
-## Integration with Express
-
-## Integration with Helmet -->
