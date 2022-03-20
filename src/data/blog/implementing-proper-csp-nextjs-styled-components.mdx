@@ -231,7 +231,7 @@ const generateCSP = () => {
 
   // adder function for our policy object
   const add = (directive, value, options = {}) => {
-    if (options && process.env.NODE_ENV !== 'development') return;
+    if (options.devOnly && process.env.NODE_ENV !== 'development') return;
     const curr = policy[directive];
     policy[directive] = curr ? [...curr, value] : [value];
   };
