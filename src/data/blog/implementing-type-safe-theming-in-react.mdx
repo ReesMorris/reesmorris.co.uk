@@ -1,0 +1,1075 @@
+---
+title: 'Implementing type-safe theming in React'
+date: '2022-08-04'
+summary: 'There are many methods to implement theming in React, but many are not type-safe. Is there a better way to make your themes type-friendly?'
+---
+
+## Introduction
+
+If you've ever been working on a moderately-large React project, you'll likely have run into the issue of figuring out the best way to implement theming in a type-safe manner, even if you only have one theme!
+
+This blog post delves into the details of my preference for implementing theming for a React project which manages to separate the palette from the theme, supports multiple themes, and is completely type-safe.
+
+The final source code of this investigation is [available on GitHub](https://github.com/ReesMorris/type-safe-theming).
+
+## Architecture
+
+The plan is to separate our theme out into two aspects - static tokens and theme tokens. We'll then store these tokens as [CSS variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties).
+
+### Static Tokens
+
+Our static tokens will contain all of the data related to our website's palette, such as the colours, typography, line heights, font weights, etc.
+
+If your application only has a single theme, or if all of its themes share the same colour palette, then you'll only need one file for your static tokens. If your palette changes between themes, then you'll create a separate file for each theme.
+
+```javascript
+{
+  // theme: 'light', // no need for this if we're only using one palette
+  colors: {
+    black: '#000',
+    white: '#fff',
+    red: {
+      100: '#cc0000',
+      200: '#b80000',
+      300: '#a30000',
+      ...
+    }
+  },
+  fonts: {
+    sans: 'sans-serif',
+    serif: 'serif',
+    mono: 'monospace',
+  }
+}
+```
+
+### Theme Tokens
+
+Our theme tokens will define the styling for every aspect of our website.
+
+For instance, you may want to declare the background colour, text colour, and font style of your website's header.
+
+Traditionally, we'd have those values referenced in a CSS file, or directly declared as a CSS variable, `--header-background: #fff`.
+
+Instead, our theme tokens will _exclusively_ map to our static tokens, like this:
+
+```javascript
+{
+  theme: 'light',
+  header: {
+      background: 'colors.white',
+      text: 'colors.red.100',
+      font: 'fonts.mono',
+  }
+}
+```
+
+This will be the same as setting `--header-background: var(--colours-white)`, with the path to the colour matching the structure of our static tokens object above.
+
+### CSS-in-JS
+
+This guide assumes you're fine with using CSS-in-JS solutions such as [styled-components](https://www.styled-components.com) or [emotion](https://emotion.sh), since our strongly-typed theme tokens won't work with separate `.css` files or modules.
+
+### CSS Variables
+
+We'll be using CSS variables to store both our static tokens and our theme tokens, since they can be built into the application at build time and therefore have zero runtime overhead.
+
+<Note type='info' icon={{ name: 'graduation-cap' }}>
+
+CSS variables are [not supported by Internet Explorer](https://caniuse.com/css-variables), though its [recent retirement by Microsoft](https://blogs.windows.com/windowsexperience/2022/06/15/internet-explorer-11-has-retired-and-is-officially-out-of-support-what-you-need-to-know/) means that this should not be an issue, unless you _need_ to support legacy systems.
+
+</Note>
+
+If your styling data comes from an API unavailable at build time, you'll still be able to use this approach.
+
+We'll be storing our tokens in the `:root` pseudo-class, and will use [attribute selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors) to separate our themes. The default theme will also be explicitly set on `:root` without any selectors, to avoid any flickers.
+
+Based on the examples above, we could expect an output like this:
+
+```css
+:root {
+  --colors-black: #000;
+  --colors-white: #fff;
+  --colors-red-100: #cc0000;
+  --colors-red-200: #b80000;
+  --colors-red-300: #a30000;
+  --fonts-sans: sans-serif;
+  --fonts-serif: serif;
+  --fonts-mono: monospace;
+}
+
+:root,
+:root[data-theme='light'] {
+  --header-background: var(--colors-white);
+  --header-text: var(--colors-red-100);
+  --header-font: var(--fonts-mono);
+}
+```
+
+Whilst it's entirely possible to exclude the whole "static tokens" aspect of the implementation, this method gives us a single source of truth for our themes, meaning we can easily change any value in our palette and know that all references to that value will be updated.
+
+One last note, whilst I've gone for a pretty standard implementation of our theme objects above, this implementation allows you to structure your objects _any way_ you'd like. You can add as many or as little nodes to your root object as you'd like, and name them whatever suits your project.
+
+## What we'll build
+
+We're essentially going to build our own theme library, that allows us to define themes, palettes, and use them in our application. This post is _extremely_ long-winded, so if you're just looking for the final source code then [check out this repo](https://github.com/ReesMorris/type-safe-theming)!
+
+If you are interested in following through the process step-by-step, however, I'd definitely recommend sticking around. It's gonna be a good one!
+
+## Implementation
+
+We'll be starting from scratch here, so you're more than welcome to follow along on an existing or brand new project! Just remember to use TypeScript, as that's what this is all about.
+
+### 1. Directory structure
+
+Let's start by creating two new directories:
+
+- `theme` - this will contain our theme declarations for our app
+- `libs/theme` - this will be the logic for managing our themes, type declarations, and will be sharable between projects (great for a utility package)!
+
+### 2. Declaring our library types
+
+Inside our `libs/theme` directory, let's add a directory called `types` and create a `theme.d.ts` file with the following:
+
+```typescript
+// libs/theme/types/theme.d.ts
+declare module 'theming' {
+  export type TokenValue = string | number;
+
+  // ... all upcoming code will stay within this module ...
+}
+```
+
+The module declaration will allow us to augment this module later on, as well as host this in a utility package external from our project. If you're planning on doing that, it's probably good practice to name this `@mypackage/theming` instead.
+
+The `TokenValue` is the type that our static tokens will be. Since our static tokens can refer to colours, fonts, heights, anything(!), our union should cover all bases.
+
+Add this below the code you just added. It may seem odd, but we'll talk through it:
+
+```typescript
+// libs/theme/types/theme.d.ts
+export interface StaticTokensInternal {
+  theme?: string;
+}
+
+export interface StaticTokens extends StaticTokensInternal {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export interface ThemeTokensInternal {
+  theme: string;
+}
+
+export interface ThemeTokens extends ThemeTokensInternal {} // eslint-disable-line @typescript-eslint/no-empty-interface
+```
+
+There are two main types being added here: `StaticTokens` and `ThemeTokens`; along with `Internal` types for them. Essentially, our `Internal` types will only be used within the library itself, whilst the non-internal types will be available to the project.
+
+By creating an empty, non-"internal" interface, we allow for [module augmentation](https://www.typescriptlang.org/docs/handbook/declaration-merging.html#module-augmentation).
+
+<Note type='info' icon={{ name: 'sparkles' }}>
+
+You can actually pre-define some "standards" within your `StaticTokensInternal` object:
+
+```typescript
+export interface StaticTokensInternal {
+  theme?: string;
+  colors: {
+    transparent: ThemeValue; // we'll define this type shortly
+    black: ThemeValue;
+    white: ThemeValue;
+  };
+}
+```
+
+When we declare our custom static tokens in our app, we won't need to re-declare these, but can still override them and access them directly! Pretty neat, huh?
+
+</Note>
+
+Next up, let's create a helper type called `flatten-interface.ts`. I'd recommend storing it in a `utils` or `types` folder in your project root, since it's very generic.
+
+```typescript
+// utils/flatten-interface.ts
+type DotPrefix<T extends string> = T extends '' ? '' : `.${T}`;
+
+export type FlattenInterface<T> = (
+  [T] extends [never]
+    ? ''
+    : T extends object
+    ? {
+        [K in Exclude<keyof T, symbol>]: `${K}${DotPrefix<
+          FlattenInterface<T[K]>
+        >}`;
+      }[Exclude<keyof T, symbol>]
+    : ''
+) extends infer D
+  ? Extract<D, string>
+  : never;
+```
+
+The code above, kindly [shared by jcalz on StackOverflow](https://stackoverflow.com/a/66661477/7404953), will essentially take an interface and return a union type with all paths collapsed into a dot-separated string.
+
+For instance, our [static tokens example](#static-tokens) above would be collapsed into this union type:
+
+```typescript
+'colors.black' | 'colors.white' | 'colors.red.100' | 'colors.red.200' | 'colors.red.300' | 'fonts.sans' | 'fonts.serif' | 'fonts.mono'; // prettier-ignore
+```
+
+Last but not least here, back inside our `libs/theme/types` directory, let's create `props.ts`:
+
+```typescript
+// libs/theme/types/props.ts
+import { FlattenInterface } from '../your/path';
+import { StaticTokens, StaticTokensInternal, ThemeTokens } from 'theming';
+
+export type StaticToken =
+  | FlattenInterface<Omit<StaticTokensInternal, 'theme'>>
+  | FlattenInterface<Omit<StaticTokens, 'theme'>>;
+
+export type ThemeToken = FlattenInterface<Omit<ThemeTokens, 'theme'>>;
+```
+
+With these two types, our app's components will be able to accept them as props, which ensures a strongly-typed approach to our theme.
+
+We're purposefully omitting `theme` from our types, as this will be used exclusively in creating our `:root` styles, and should not be available to the app.
+
+### 3. Declaring the theme types
+
+Let's start by creating `create-theme.ts` in a new `libs/theme/utils` directory:
+
+```typescript
+import { ThemeTokens } from 'theming';
+
+// libs/theme/utils/create-theme.ts
+export const createTheme = (theme: ThemeTokens): ThemeTokens => {
+  return theme;
+};
+```
+
+This function is arguably unnecessary, but it serves a purpose: by using this function to define a theme in our app, we avoid the need to define our types for each theme - the function handles that for us!
+
+Of course, you can also extend this function to have more purpose - such as data validation, or adding additional tokens, or whatever you'd like.
+
+Let's make a similar utility function for our static tokens, called `create-static-tokens.ts`:
+
+```typescript
+import { StaticTokens } from 'theming';
+
+export const createStaticTokens = (theme: StaticTokens): StaticTokens => {
+  return theme;
+};
+```
+
+The purpose of this function is practically identical to the `createTheme` function, moving the responsibility of creating the theme to the library rather than requiring the app to import our types.
+
+The only difference to note is if you're modifying the `StaticTokensInternal` interface:
+
+<Note type='info' icon={{ name: 'sparkles' }}>
+
+If you added any static tokens to your `StaticTokensInternal` object, you'd return an object here which adds those in and spreads the remaining properties, like this:
+
+```typescript
+export const createStaticTokens = (theme: StaticTokens): StaticTokens => {
+  const { colors, ...rest } = theme;
+
+  return {
+    colors: {
+      transparent: 'transparent',
+      black: '#000',
+      white: '#fff',
+      ...(colors || {})
+    },
+    ...rest
+  };
+};
+```
+
+</Note>
+
+Next, let's jump into our app and create a new file in `theme` called `theme.d.ts`:
+
+```typescript
+// theme/theme.d.ts
+import { StaticToken } from '../your/path';
+
+declare module 'theming' {
+  export interface StaticTokens {
+    // .. this contains your app's theme palette declarations ..
+    // .. this is just example code, put whatever here! ..
+    colors: {
+      black: ThemeValue;
+      white: ThemeValue;
+      grey: {
+        100: ThemeValue;
+        900: ThemeValue;
+      };
+    };
+    fonts: {
+      sans: ThemeValue;
+    };
+  }
+
+  export interface ThemeTokens {
+    // .. this is what will style your apps components ..
+    // .. again, just example code here, put whatever in it! ..
+    body: {
+      background: StaticToken;
+      text: StaticToken;
+      font: StaticToken;
+    };
+    button: {
+      background: StaticToken;
+      color: StaticToken;
+    };
+  }
+}
+```
+
+<Note type='info' icon={{ name: 'sparkles' }}>
+If you're having trouble with the type definition, try referencing the library's module at the top of the file:
+
+```typescript
+/// <reference path="../path/to/libs/theme/types/theme.d.ts" />
+```
+
+</Note>
+
+This is where our module augmentation comes into play! We get no errors about missing props, even if we declared some in our `StaticTokensInternal` interface.
+
+Don't forget to rename the module if you changed it to something like `@mypackage/theming`.
+
+### 4. Creating the themes
+
+If your palette is a many-to-one mapping, meaning that you'll be using the same colour palette for multiple themes (or only have one theme), create a `static.ts` file in your `theme` directory.
+
+If your palette changes on a per-theme basis, skip creating a `static.ts` file, and instead create a `[light|dark|whatever].ts` file in your `theme` directory, which will host your theme and its palette.
+
+```typescript
+// theme/static.ts (OR) theme/light.ts
+import { createStaticTokens } from '../your/path';
+
+// you can remove `light` from the name if this file IS `static.ts`
+export const lightStaticTokens = createStaticTokens({
+  theme: 'light', // only needed if this file ISN'T `static.ts`
+  colors: {
+    black: '#000',
+    white: '#fff',
+    grey: {
+      100: '#d0d0d7',
+      900: '#17171c'
+    }
+  },
+  fonts: {
+    sans: 'sans-serif'
+  }
+});
+```
+
+The object above is a complete implementation based on the `StaticTokens` we defined in `theme/theme.d.ts`. If your interface is different, you'll get type errors here, which is _exactly_ what we want!
+
+Let's create a theme file, `theme/light.ts`. It's fine if this file already exists, just add the theme code at the end:
+
+```typescript
+// theme/light.ts
+import { createTheme } from '../your/path';
+
+export const lightTheme = createTheme({
+  theme: 'light',
+  body: {
+    background: 'colors.grey.100',
+    text: 'colors.grey.900',
+    font: 'fonts.sans'
+  },
+  button: {
+    background: 'colors.white',
+    color: 'colors.black'
+  }
+});
+```
+
+Once again, the object above is based on the `ThemeTokens` we defined in `theme/theme.d.ts`.
+
+If you copied the code exact, try removing one of the `body` fields; when re-adding it you should see TypeScript provide the union recommendations from the palette!
+
+For completeness, let's quickly add a `theme/dark.ts` file as well.
+
+```typescript
+// theme/dark.ts
+
+// .. don't forget your `darkStaticTokens` object, if you need one ..
+
+export const darkTheme = createTheme({
+  theme: 'dark',
+  body: {
+    background: 'colors.grey.900',
+    text: 'colors.grey.100',
+    font: 'fonts.sans'
+  },
+  button: {
+    background: 'colors.black',
+    color: 'colors.white'
+  }
+});
+```
+
+### 5. Creating a ThemeProvider
+
+Now that we have our themes, let's create a provider that we can pass all of our static tokens and theme tokens to.
+
+We'll create a new directory in `libs/theme/provider`, and create a file called `provider.tsx` in its most basic form:
+
+```typescript
+// libs/theme/provider/provider.tsx
+import { StaticTokens, ThemeTokens } from 'theming';
+
+interface ThemeProviderProps {
+  defaultTheme: string;
+  themes: ThemeTokens[];
+  staticTokens: StaticTokens[];
+  children?: React.ReactNode;
+}
+
+export const ThemeProvider = ({
+  defaultTheme,
+  themes,
+  staticTokens,
+  children
+}: ThemeProviderProps) => {
+  return <>{children}</>;
+};
+```
+
+Before we implement the provider, let's make sure it's wrapping our whole application in the `app.tsx` file, passing in all of our static tokens and themes as an array.
+
+Even if you only have one static tokens object, it should still be in array form, since we'll identify it as global by the lack of a `theme` field.
+
+```tsx
+// app.tsx (or equivalent) -- I'm using Next.js here, but use whatever!
+import { ThemeProvider } from '../your/path';
+import {
+  lightTheme,
+  darkTheme,
+  lightStaticTokens,
+  darkStaticTokens
+} from '../your/path';
+
+const MyApp = ({ Component, pageProps }: AppProps) => {
+  return (
+    <ThemeProvider
+      defaultTheme='light'
+      themes={[lightTheme, darkTheme]}
+      staticTokens={[lightStaticTokens, darkStaticTokens]}
+    >
+      <Component {...pageProps} />
+    </ThemeProvider>
+  );
+};
+```
+
+Great, our theme objects are being passed into our provider, but we still have a bit of work to do - since we're currently passing in an object, which will need to be converted into a bunch of CSS variables.
+
+Let's start by creating a utility function to flatten objects out, much like our `FlattenInterface` type, but for objects instead of interfaces!
+
+```typescript
+// utils/flatten-object.ts
+export const flattenObject = <T extends Record<string, any>>(
+  object: T,
+  { separator = '-' } = {}
+): Record<string, any> => {
+  const flatten = (object: T, path?: string): Record<string, any> => {
+    return Object.entries(object).reduce((acc, [key, val]) => {
+      if (val === undefined) return acc;
+      if (path) key = `${path}${separator}${key}`;
+      if (
+        typeof val === 'object' &&
+        val !== null &&
+        !(val instanceof Date) &&
+        !(val instanceof RegExp) &&
+        !Array.isArray(val)
+      ) {
+        if (val !== val.valueOf()) {
+          return { ...acc, [key]: val.valueOf() };
+        }
+        return { ...acc, ...flatten(val, key) };
+      }
+      return { ...acc, [key]: val };
+    }, {});
+  };
+
+  return flatten(object);
+};
+```
+
+This lovely (and slightly modified) little script comes from [KuSh's contribution](https://gist.github.com/penguinboy/762197?permalink_comment_id=4058844#gistcomment-4058844) to a continually evolving thread of the best way to implement this in TypeScript.
+
+The only modification is the introduction of a config object with a `separator` field, since we'll want to use a hyphen rather than a period for our CSS variables.
+
+Just to explain what this is doing, if we call this function with one of our _themeTokens_ objects, it returns this:
+
+```typescript
+{
+  'theme': 'light',
+  'body-background': 'colors.grey.100',
+  'body-text': 'colors.grey.900',
+  'body-font': 'fonts.sans'
+}
+```
+
+Our end goal is to have all of these variables in a `:root` CSS rule, with variable declarations like `--body-background: var(--colors-gray-100)`; we're _very_ close.
+
+### 6. Building the style rules
+
+You may have noticed that a lot of sites prefix their CSS variable names with a 'unique' identifier, like _chakra_ in `--chakra-ring-inset`, or _theme-ui_ in `--theme-ui-colors-text`. This helps prevent collisions with other projects, which can save a lot of headaches in the long run. Let's add the same here.
+
+Create a new file, `libs/theme/config.ts` with the following export:
+
+```typescript
+// libs/theme/config.ts
+export const themeConfig = {
+  cssTokenPrefix: 'my-epicness' // whatever you want, of course!
+};
+```
+
+Next, let's create a builder function, `build-static-rule.ts`, in our `libs/theme/utils` directory that will take our static tokens and convert them into CSS variable-friendly strings!
+
+```typescript
+// libs/theme/utils/build-static-rule.ts
+import { StaticTokens } from 'theming';
+import { flattenObject } from '../your/path';
+import { themeConfig } from '../your/path';
+
+const { cssTokenPrefix } = themeConfig;
+
+export const buildStaticRule = (staticTokens: StaticTokens) => {
+  const flat = flattenObject(staticTokens);
+  let css = '';
+
+  Object.entries(flat).forEach(([key, value]) => {
+    if (key !== 'theme') {
+      css += `--${cssTokenPrefix}-${key}: ${value};`;
+    }
+  });
+
+  return css;
+};
+```
+
+This builder function will take our static tokens and convert them into a string of CSS variables, returning a string that looks like this (when formatted):
+
+```css
+--my-epicness-colors-black: #000;
+--my-epicness-colors-white: #fff;
+--my-epicness-colors-grey-100: #d0d0d7;
+--my-epicness-colors-grey-900: #17171c;
+--my-epicness-fonts-sans: sans-serif;
+```
+
+We'll now need to implement the same builder function for our theme tokens, but first we'll need to implement another utility function. Remember how the `flattenObject` response was returning `'body-background': 'colors.grey.100'`? We need to convert its value into a CSS variable, `var(--my-epicness-colors-gray-100)`).
+
+Let's create a new util file called `theme-var.ts`:
+
+```typescript
+// libs/theme/utils/theme-var.ts
+import { themeConfig } from '../your/path';
+import { ThemeToken } from '../your/path';
+
+const { cssTokenPrefix } = themeConfig;
+
+export const themeVar = (path: ThemeToken): string => {
+  let newVal = path.toString() as string;
+  newVal = newVal.replace(/\./g, '-');
+  return `var(--${cssTokenPrefix}-${newVal})`;
+};
+```
+
+This will take any of our established paths, such as `colors.grey.100`, and convert it into a CSS variable taking our `cssTokenPrefix` into account, returning:
+
+```css
+var(--my-epicness-colors-grey-100)
+```
+
+With this utility ready to go, let's create our `build-theme-rule.ts` file:
+
+```typescript
+// libs/theme/utils/build-theme-rule.ts
+import { ThemeTokens } from 'theming';
+import { flattenObject } from '../your/path';
+import { themeConfig } from '../your/path';
+import { ThemeToken } from '../your/path';
+import { themeVar } from '../your/path';
+
+const { cssTokenPrefix } = themeConfig;
+
+export const buildThemeRule = (themeTokens: ThemeTokens) => {
+  const flat = flattenObject(themeTokens);
+  let css = '';
+
+  Object.entries(flat).forEach(([key, value]) => {
+    if (key !== 'theme') {
+      css += `--${cssTokenPrefix}-${key}: ${themeVar(value as ThemeToken)};`;
+    }
+  });
+
+  return css;
+};
+```
+
+If we passed one of our _themeTokens_ objects as a test, it would return this:
+
+```css
+--my-epicness-body-background: var(--my-epicness-colors-grey-100);
+--my-epicness-body-text: var(--my-epicness-colors-grey-900);
+--my-epicness-body-font: var(--my-epicness-fonts-sans);
+```
+
+Amazing! Let's get it linked up!
+
+### 7. Rendering the style rules
+
+As our plan is to render _all_ style rules in the `:root` rule, with non-default themes using attribute selectors to target specific themes, we'll want to create a utility function that can handle this for us.
+
+Let's add `build-selector.ts` to our `libs/theme/utils` directory:
+
+```typescript
+// libs/theme/utils/build-selector.ts
+export const buildSelector = (
+  cssRule: string,
+  themeName?: string,
+  isDefaultTheme?: boolean
+) => {
+  let css = ``;
+
+  if (isDefaultTheme || !themeName) {
+    css += `:root`;
+  }
+
+  if (themeName) {
+    css += `,:root[data-theme="${themeName}"]`;
+  }
+
+  return `${css} { ${cssRule} } `;
+};
+```
+
+It's a somewhat simple function, which takes our already-converted CSS variables string, and returns the `:root` CSS selector based on the conditions of the theme.
+
+- If the theme is the default theme, _or no name is provided_ (since you might only have one theme), we'll return the `:root` selector directly to make it the default theme.
+- If the theme has a name, we'll also add an attribute selector to target it - even if it's the default theme.
+
+With this ready to roll, let's create a new directory in `libs/theme` called `css`.
+
+Inside the directory, create a new file `root.ts`, which is where we'll put our logic to generate the CSS stylesheet for our `:root` rule.
+
+```typescript
+// libs/theme/css/root.ts
+import { StaticTokens, ThemeTokens } from 'theming';
+import { buildSelector } from '../your/path';
+import { buildStaticRule } from '../your/path';
+import { buildThemeRule } from '../your/path';
+
+export const rootCSS = (
+  defaultTheme: string,
+  themes: ThemeTokens[],
+  staticTokens: StaticTokens[]
+) => {
+  let style = '';
+
+  // Static tokens
+  staticTokens.forEach(token => {
+    style += buildSelector(
+      buildStaticRule(token),
+      token.theme,
+      token.theme === defaultTheme
+    );
+  });
+
+  // Theme tokens
+  themes.forEach(theme => {
+    style += buildSelector(
+      buildThemeRule(theme),
+      theme.theme,
+      theme.theme === defaultTheme
+    );
+  });
+
+  return style;
+};
+```
+
+This is where all of our hard work comes together: we take our _staticTokens_ and _themeTokens_, convert them into CSS variables, and then we build our CSS selector based on the theme.
+
+The only thing left to do here is to actually render the CSS stylesheet within our ThemeProvider. In its _most basic_ form, we're pretty much good to embed the CSS stylesheet into a `<style>` tag:
+
+```tsx
+// libs/theme/provider/provider.tsx
+return (
+  <>
+    <style>{rootCSS(defaultTheme, themes, staticTokens)}</style>
+    {children}
+  </>
+);
+```
+
+That said, this implementation _can_ create some issues if you're using a framework like Next.js, since it doesn't integrate very well with the server-side rendering. Using a library like [styled-components](https://www.styled-components.com/) or [emotion](https://emotion.sh) can help with this:
+
+```tsx
+// libs/theme/provider/provider.tsx
+import { Global } from '@emotion/react';
+
+return (
+  <>
+    <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
+    {children}
+  </>
+);
+```
+
+Let there be themes!
+
+### 8. Creating a global theme
+
+Now that our themes are integrated into the app, let's create a global theme that can call upon our theme tokens.
+
+Let's add a new 'theme' called `global.ts` to our `theme` directory:
+
+```typescript
+// theme/global.ts
+import { css } from '@emotion/react';
+import { themeVar } from '../your/path';
+
+export const globalCSS = css`
+  body {
+    background: ${themeVar('body.background')};
+    font-family: ${themeVar('body.font')};
+    color: ${themeVar('body.text')};
+  }
+`;
+```
+
+<Note type='info' icon={{ name: 'graduation-cap' }}>
+
+Both `@emotion/react` and `styled-components` (and likely others) export a `css` function, so you can use whatever is already set up on your project.
+
+The use of `css` isn't _strictly_ necessary here, but it'll allow your code editor to format your CSS properly.
+
+</Note>
+
+Notice how we're re-using our `themeVar` function here? This allows us to reference our theme tokens anywhere in our application, in a type-safe manner.
+
+Let's update our ThemeProvider to accept the global theme, and render it as a global style:
+
+```tsx
+// libs/theme/provider/provider.tsx
+import { StaticTokens, ThemeTokens } from 'theming';
+import { Global, SerializedStyles } from '@emotion/react'; // replace with styled-components if needed
+import { rootCSS } from '../your/path';
+
+interface ThemeProviderProps {
+  defaultTheme: string;
+  themes: ThemeTokens[];
+  staticTokens: StaticTokens[];
+  globalCSS?: SerializedStyles;
+  children?: React.ReactNode;
+}
+
+export const ThemeProvider = ({
+  defaultTheme,
+  themes,
+  staticTokens,
+  globalCSS,
+  children
+}: ThemeProviderProps) => {
+  return (
+    <>
+      <Global styles={globalCSS} />
+      <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
+      {children}
+    </>
+  );
+};
+```
+
+Last but not least, update your `app.tsx` file to pass the global theme into the ThemeProvider component:
+
+```tsx
+// app.tsx
+<ThemeProvider
+  defaultTheme='light'
+  themes={[lightTheme, darkTheme]}
+  staticTokens={[lightStaticTokens, darkStaticTokens]}
+  globalCSS={globalCSS}
+>
+  <Component {...pageProps} />
+</ThemeProvider>
+```
+
+If all is done right, your global styles should now be present!
+
+### 9. Styling our components
+
+Let's add a Button component in our app that will allow us to change themes in the next step.
+
+Create a new `components/button` directory, with a `button.tsx` file:
+
+```tsx
+// components/button/button.tsx
+import styled from '@emotion/styled';
+import { ThemeToken } from '../your/path';
+import { themeVar } from '../your/path';
+
+interface ButtonProps {
+  color?: ThemeToken;
+  onClick?: () => void;
+  children: React.ReactNode;
+}
+
+interface ScButtonProps {
+  $color?: ButtonProps['color'];
+}
+
+const ScButton = styled.button<ScButtonProps>`
+  background-color: ${themeVar('button.background')};
+  color: ${props => themeVar(props.$color || 'button.color')};
+`;
+
+export const Button = ({ color, onClick, children }: ButtonProps) => {
+  return (
+    <ScButton $color={color} onClick={onClick}>
+      {children}
+    </ScButton>
+  );
+};
+```
+
+This is a pretty contrived example, but demonstrates how a component can be styled using the `themeVar` function - either directly or via a prop that accepts a _ThemeToken_.
+
+If we add this to our homepage (`index.tsx` in your case?), we can see the effect of our theme changes:
+
+```tsx
+// pages/index.tsx
+import { Button } from '../your/path';
+
+const Home = () => {
+  return <Button color='body.text'>Toggle theme</Button>;
+};
+
+export default Home;
+```
+
+Inspecting the button in the browser shows that our themes are being applied!
+
+### 10. Toggling the theme
+
+This post is already far too long to delve into the essentials of managing and persisting themes, and I'd encourage using a library to handle that for you (such as [next-themes](https://github.com/pacocoursey/next-themes) for Next.js, but we're in a great position to demonstrate the essentials.
+
+Let's update our ThemeProvider component to manage some state, and append a `data-theme` attribute to the `<html>` tag. This obviously won't work great with server-side rendering, and doesn't persist state at all, but it's a good enough start for our case!
+
+```tsx
+// libs/theme/provider/provider.tsx
+import { useEffect, useState, createContext, useContext } from 'react';
+import { StaticTokens, ThemeTokens } from 'theming';
+import { Global, SerializedStyles } from '@emotion/react';
+import { rootCSS } from '../your/path';
+
+interface ThemeProviderProps {
+  defaultTheme: string;
+  themes: ThemeTokens[];
+  staticTokens: StaticTokens[];
+  globalCSS?: SerializedStyles;
+  children?: React.ReactNode;
+}
+
+interface ThemeContextProps {
+  theme: ThemeProviderProps['defaultTheme'];
+  setTheme: (name: ThemeProviderProps['defaultTheme']) => void;
+}
+
+const ThemeContext = createContext<ThemeContextProps>({
+  theme: '',
+  setTheme: () => null
+});
+
+export const ThemeProvider = ({
+  defaultTheme,
+  themes,
+  staticTokens,
+  globalCSS,
+  children
+}: ThemeProviderProps) => {
+  const [theme, setTheme] = useState(defaultTheme);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <Global styles={globalCSS} />
+      <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => useContext(ThemeContext);
+```
+
+There is _a lot_ going on here, but most of it is pretty self-explanatory. We're creating a new context provider to store the current theme, and a new hook to access it. Once again, this won't work very well with persisted state or server-side rendering, but it's a good enough example.
+
+The `useTheme` hook is exposed so that our components can access and modify the current theme - let's update our Button component to use it:
+
+```tsx
+// pages/index.tsx
+import { Button } from '../your/path';
+import { useTheme } from '../your/path';
+
+const Home = () => {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <Button
+      color='body.text'
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+    >
+      Hello
+    </Button>
+  );
+};
+
+export default Home;
+```
+
+Ta-da! Not only can we now toggle our theme, but this can be easily expanded to support multiple themes.
+
+We didn't create a wrapper for the `setTheme` function in this case, but it can easily be updated to support multiple themes and be type-safe. Speaking of...
+
+### 11. CSS Reset (optional)
+
+Last but not least, we may as well add a CSS reset into our library! I've found [Josh W. Comeau's CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset) to be perfect for the modern web, so we'll use that in this example.
+
+Let's create a `reset.ts` file in our `libs/theme/css` directory:
+
+```tsx
+// libs/theme/css/reset.ts
+import { css } from '@emotion/react';
+
+export const resetCSS = css`
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 62.5%; /* Set the base font to 10px */
+  }
+
+  html,
+  body {
+    height: 100%;
+    width: 100%;
+    position: fixed; /* Fixes a weird bug that allows scrolling down */
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    color: inherit;
+    font: inherit;
+  }
+
+  button {
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  #root,
+  #__next {
+    isolation: isolate;
+  }
+
+  ul {
+    list-style-type: none;
+  }
+`;
+```
+
+We _could_ create another prop in our ThemeProvider to accept this, but it's essentially another "global" CSS file - so let's update the ThemeProvider to accept an array of global styles instead.
+
+Inside our ThemeProvider, let's update the `globalCSS` declaration to take an array:
+
+```typescript
+interface ThemeProviderProps {
+  // ...
+  globalCSS?: SerializedStyles[];
+  // ...
+}
+```
+
+And let's update the `return` statement to map this array instead:
+
+```tsx
+return (
+  <ThemeContext.Provider value={{ theme, setTheme }}>
+    {globalCSS &&
+      globalCSS.map(css => {
+        return <Global styles={css} key={css.name} />;
+      })}
+    <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
+    {children}
+  </ThemeContext.Provider>
+);
+```
+
+Last but not least, let's provide the CSS reset to our ThemeProvider in our `app.tsx`:
+
+```tsx
+return (
+  <ThemeProvider
+    defaultTheme='light'
+    themes={[lightTheme, darkTheme]}
+    staticTokens={[lightStaticTokens, darkStaticTokens]}
+    globalCSS={[resetCSS, globalCSS]}
+  >
+    <Component {...pageProps} />
+  </ThemeProvider>
+);
+```
+
+... and we're done!
+
+## Conclusion
+
+Well, it's once again been another huge blog post that could've probably been accomplished by saying "here's a GitHub repo, check it out!", but we got there in the end.
+
+The good news is that, once you've implemented this in any of your apps, you're essentially able to integrate it with any project in a matter of minutes.
+
+Go make some themes!

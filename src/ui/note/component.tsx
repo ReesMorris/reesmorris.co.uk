@@ -24,6 +24,10 @@ const ScIconWrapper = styled.div`
   width: ${staticThemeVar('space-2')};
 `;
 
+const ScContent = styled.div`
+  overflow: auto;
+`;
+
 export const Note = (props: NoteProps) => {
   return (
     <ScNote className={cn('note', props.className)}>
@@ -32,7 +36,7 @@ export const Note = (props: NoteProps) => {
           <Icon {...props.icon} />
         </ScIconWrapper>
       )}
-      <div>{props.children}</div>
+      <ScContent>{props.children}</ScContent>
     </ScNote>
   );
 };

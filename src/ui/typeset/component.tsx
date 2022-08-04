@@ -103,7 +103,8 @@ const ScTypeset = styled.div`
     .keyword {
       color: ${themeVar('color-code-keyword')};
     }
-    .string {
+    .string,
+    .hexcode {
       color: ${themeVar('color-code-string')};
     }
     .comment {
@@ -111,7 +112,9 @@ const ScTypeset = styled.div`
     }
     .property-access,
     .number,
-    .constant {
+    .constant,
+    .selector,
+    .language-css .variable {
       color: ${themeVar('color-code-constant')};
     }
     .function {
