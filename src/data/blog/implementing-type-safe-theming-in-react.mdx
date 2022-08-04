@@ -562,7 +562,7 @@ This builder function will take our static tokens and convert them into a string
 --my-epicness-fonts-sans: sans-serif;
 ```
 
-We'll now need to implement the same builder function for our theme tokens, but first we'll need to implement another utility function. Remember how the `flattenObject` response was returning `'body-background': 'colors.grey.100'`? We need to convert its value into a CSS variable, `var(--my-epicness-colors-gray-100)`).
+We'll now need to implement the same builder function for our theme tokens, but first we'll need to implement another utility function. Remember how the `flattenObject` response was returning `'body-background': 'colors.grey.100'`? We need to convert its value into a CSS variable, `var(--my-epicness-colors-gray-100)`.
 
 Let's create a new util file called `theme-var.ts`:
 
@@ -858,7 +858,7 @@ Inspecting the button in the browser shows that our themes are being applied!
 
 ### 10. Toggling the theme
 
-This post is already far too long to delve into the essentials of managing and persisting themes, and I'd encourage using a library to handle that for you (such as [next-themes](https://github.com/pacocoursey/next-themes) for Next.js, but we're in a great position to demonstrate the essentials.
+This post is already far too long to delve into the essentials of managing and persisting themes, and I'd encourage using a library to handle that for you (such as [next-themes](https://github.com/pacocoursey/next-themes) for Next.js), but we're in a great position to demonstrate the essentials.
 
 Let's update our ThemeProvider component to manage some state, and append a `data-theme` attribute to the `<html>` tag. This obviously won't work great with server-side rendering, and doesn't persist state at all, but it's a good enough start for our case!
 
@@ -939,7 +939,7 @@ export default Home;
 
 Ta-da! Not only can we now toggle our theme, but this can be easily expanded to support multiple themes.
 
-We didn't create a wrapper for the `setTheme` function in this case, but it can easily be updated to support multiple themes and be type-safe. Speaking of...
+We didn't create a wrapper for the `setTheme` function in this case, but it can easily be updated to support multiple themes and be type-safe.
 
 ### 11. CSS Reset (optional)
 
