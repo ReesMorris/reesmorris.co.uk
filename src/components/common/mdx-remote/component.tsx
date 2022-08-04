@@ -25,13 +25,15 @@ export const MDXRemote = (props: MDXRemoteProps) => {
   return (
     <NextMDXRemote
       {...source}
-      components={{
-        a: (props: LinkProps) => <Link {...props} />,
-        Note: (props: NoteProps) => <Note {...props} />,
-        TabList: (props: TabListProps) => <TabList {...props} />,
-        TabPanel: (props: TabPanelProps) => <TabPanel {...props} />,
-        TabContent: (props: TabContentProps) => <TabContent {...props} />
-      }}
+      components={
+        {
+          a: (props: LinkProps) => <Link {...props} />,
+          Note: (props: NoteProps) => <Note {...props} />,
+          TabList: (props: TabListProps) => <TabList {...props} />,
+          TabPanel: (props: TabPanelProps) => <TabPanel {...props} />,
+          TabContent: (props: TabContentProps) => <TabContent {...props} />
+        } as never
+      }
       {...rest}
     />
   );
