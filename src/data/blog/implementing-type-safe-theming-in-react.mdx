@@ -217,8 +217,8 @@ Last but not least here, back inside our `libs/theme/types` directory, let's cre
 
 ```typescript
 // libs/theme/types/props.ts
-import { FlattenInterface } from '../your/path';
 import { StaticTokens, StaticTokensInternal, ThemeTokens } from 'theming';
+import { FlattenInterface } from '../your/path';
 
 export type StaticToken =
   | FlattenInterface<Omit<StaticTokensInternal, 'theme'>>
@@ -236,9 +236,9 @@ We're purposefully omitting `theme` from our types, as this will be used exclusi
 Let's start by creating `create-theme.ts` in a new `libs/theme/utils` directory:
 
 ```typescript
+// libs/theme/utils/create-theme.ts
 import { ThemeTokens } from 'theming';
 
-// libs/theme/utils/create-theme.ts
 export const createTheme = (theme: ThemeTokens): ThemeTokens => {
   return theme;
 };
@@ -251,6 +251,7 @@ Of course, you can also extend this function to have more purpose - such as data
 Let's make a similar utility function for our static tokens, called `create-static-tokens.ts`:
 
 ```typescript
+// libs/theme/utils/create-static-tokens.ts
 import { StaticTokens } from 'theming';
 
 export const createStaticTokens = (theme: StaticTokens): StaticTokens => {
@@ -284,7 +285,7 @@ export const createStaticTokens = (theme: StaticTokens): StaticTokens => {
 
 </Note>
 
-Next, let's jump into our app and create a new file in `theme` called `theme.d.ts`:
+Next let's jump into our app itself (outside of our theme library), and create a new file in `theme` called `theme.d.ts`:
 
 ```typescript
 // theme/theme.d.ts
@@ -473,8 +474,8 @@ Let's start by creating a utility function to flatten objects out, much like our
 export const flattenObject = <T extends Record<string, any>>(
   object: T,
   { separator = '-' } = {}
-): Record<string, any> => {
-  const flatten = (object: T, path?: string): Record<string, any> => {
+): Record<string, unknown> => {
+  const flatten = (object: T, path?: string): Record<string, unknown> => {
     return Object.entries(object).reduce((acc, [key, val]) => {
       if (val === undefined) return acc;
       if (path) key = `${path}${separator}${key}`;
@@ -754,7 +755,7 @@ The use of `css` isn't _strictly_ necessary here, but it'll allow your code edit
 
 Notice how we're re-using our `themeVar` function here? This allows us to reference our theme tokens anywhere in our application, in a type-safe manner.
 
-Let's update our ThemeProvider to accept the global theme, and render it as a global style:
+We only have one global theme for now, but there's a chance our app will want multiple later on - so we'll set up our ThemeProvider to accept multiple themes, and render them all as global styles:
 
 ```tsx
 // libs/theme/provider/provider.tsx
@@ -766,7 +767,7 @@ interface ThemeProviderProps {
   defaultTheme: string;
   themes: ThemeTokens[];
   staticTokens: StaticTokens[];
-  globalCSS?: SerializedStyles;
+  globalCSS?: SerializedStyles[];
   children?: React.ReactNode;
 }
 
@@ -779,7 +780,10 @@ export const ThemeProvider = ({
 }: ThemeProviderProps) => {
   return (
     <>
-      <Global styles={globalCSS} />
+      {globalCSS &&
+        globalCSS.map(css => {
+          return <Global styles={css} key={css.name} />;
+        })}
       <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
       {children}
     </>
@@ -795,7 +799,7 @@ Last but not least, update your `app.tsx` file to pass the global theme into the
   defaultTheme='light'
   themes={[lightTheme, darkTheme]}
   staticTokens={[lightStaticTokens, darkStaticTokens]}
-  globalCSS={globalCSS}
+  globalCSS={[globalCSS]}
 >
   <Component {...pageProps} />
 </ThemeProvider>
@@ -873,7 +877,7 @@ interface ThemeProviderProps {
   defaultTheme: string;
   themes: ThemeTokens[];
   staticTokens: StaticTokens[];
-  globalCSS?: SerializedStyles;
+  globalCSS?: SerializedStyles[];
   children?: React.ReactNode;
 }
 
@@ -902,7 +906,10 @@ export const ThemeProvider = ({
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme }}>
-      <Global styles={globalCSS} />
+      {globalCSS &&
+        globalCSS.map(css => {
+          return <Global styles={css} key={css.name} />;
+        })}
       <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
       {children}
     </ThemeContext.Provider>
@@ -944,6 +951,8 @@ We didn't create a wrapper for the `setTheme` function in this case, but it can 
 ### 11. CSS Reset (optional)
 
 Last but not least, we may as well add a CSS reset into our library! I've found [Josh W. Comeau's CSS Reset](https://www.joshwcomeau.com/css/custom-css-reset) to be perfect for the modern web, so we'll use that in this example.
+
+Since a CSS reset _generally_ should remain consistent regardless of the application, we'll set this up directly in our library rather than as a per-project stylesheet. You can always create a toggle prop for this if necessary.
 
 Let's create a `reset.ts` file in our `libs/theme/css` directory:
 
@@ -998,19 +1007,7 @@ export const resetCSS = css`
 `;
 ```
 
-We _could_ create another prop in our ThemeProvider to accept this, but it's essentially another "global" CSS file - so let's update the ThemeProvider to accept an array of global styles instead.
-
-Inside our ThemeProvider, let's update the `globalCSS` declaration to take an array:
-
-```typescript
-interface ThemeProviderProps {
-  // ...
-  globalCSS?: SerializedStyles[];
-  // ...
-}
-```
-
-And let's update the `return` statement to map this array instead:
+Let's update the `return` statement to map this array instead:
 
 ```tsx
 return (
@@ -1019,24 +1016,10 @@ return (
       globalCSS.map(css => {
         return <Global styles={css} key={css.name} />;
       })}
+    <Global styles={resetCSS} />
     <Global styles={rootCSS(defaultTheme, themes, staticTokens)} />
     {children}
   </ThemeContext.Provider>
-);
-```
-
-Last but not least, let's provide the CSS reset to our ThemeProvider in our `app.tsx`:
-
-```tsx
-return (
-  <ThemeProvider
-    defaultTheme='light'
-    themes={[lightTheme, darkTheme]}
-    staticTokens={[lightStaticTokens, darkStaticTokens]}
-    globalCSS={[resetCSS, globalCSS]}
-  >
-    <Component {...pageProps} />
-  </ThemeProvider>
 );
 ```
 
